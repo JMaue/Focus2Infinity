@@ -14,7 +14,7 @@
     public async Task<List<string>> GetMainTopics()
     {
       var rc = new List<string>();
-      await Task.Run(() => { rc.AddRange(new string[] { "Galaxies", "Nebulae", "Clusters", "Planets", "Eclipses", "Moon", "Sunsets", "Auroras", "Landscapes", "Others" }); });
+      await Task.Run(() => { rc.AddRange(new string[] { "Galaxies", "Nebulae", "Clusters", "Planets", "Eclipses", "Milkyway", "Moon", "Sun", "Sunsets", "Auroras", "Landscapes", "Others" }); });
       return rc;
     }
 
