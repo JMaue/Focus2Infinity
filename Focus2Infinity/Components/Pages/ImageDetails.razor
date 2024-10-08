@@ -1,0 +1,32 @@
+﻿@page "/imagedetails"
+@page "/imagedetails/{Topic}/{Name}"
+
+@using System.Web
+@inject NavigationManager Navigation
+
+<h3>Image Details</h3>
+
+@if (!string.IsNullOrEmpty(ImgFile))
+{
+  <div class="row">
+    <div class="col-8">
+      <img src="@ImgFile" alt="Image" style="max-width: 100%; max-height: 100vh; height: auto;" />
+    </div>
+    <div class="col-4">
+      <Cmp_TextCard Topic=@Topic Src=@Name />
+    </div>
+  </div>
+}
+else
+{
+  <p>No image file provided.</p>
+}
+
+@code {
+  [Parameter]
+  public string Topic { get; set; }
+  [Parameter]
+  public string Name { get; set; }
+
+  private string ImgFile => @$"img/{Topic}/{Name}";
+}

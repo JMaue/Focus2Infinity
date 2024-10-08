@@ -1,0 +1,30 @@
+﻿body {
+  background-color: #111111;
+  color: white; /* Optional: Textfarbe auf weiß setzen */
+}
+
+/* Normaler Zustand */
+.menu-button {
+  color: lightsteelblue; /* Textfarbe */
+  background-color: #222222; /* Hintergrundfarbe */
+  /*border: 1px solid #ddd;*/ /* Rahmenfarbe */
+}
+
+  /* Hover-Zustand */
+  .menu-button:hover {
+    color: black; /* Textfarbe */
+    background-color: #7a9cc7; /* Hintergrundfarbe */
+    /*border: 1px solid #007bff;*/ /* Rahmenfarbe */
+  }
+
+  /* Aktiver Zustand */
+  .menu-button.active {
+    color: black; /* Textfarbe */
+    background-color: lightsteelblue; /* Hintergrundfarbe */
+    /*border: 1px solid #0056b3;*/ /* Rahmenfarbe */
+  }
+
+.img-thumbnail {
+  width: 250px;
+  height: 200px;
+}

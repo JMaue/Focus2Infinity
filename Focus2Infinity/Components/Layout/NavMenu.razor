@@ -1,0 +1,32 @@
+﻿@using Focus2Infinity.Data
+@inject F2IDataService f2iDataService
+
+<div class="sidebar bg-dark pt-2 h-100">
+  <div class="menu list-group list-group-flush bg-dark pt-5 h-100">
+    @if (allTopics == null)
+    {
+      <h5>Loading...</h5>
+    }
+    else
+    {
+      foreach (var item in allTopics)
+      {
+        <NavLink class="list-group-item list-group-item-action menu-button" href=@item>
+          @item
+        </NavLink>
+      }
+    }
+  </div>
+</div>
+
+@code {
+  private List<string> allTopics;
+
+  protected override async Task OnInitializedAsync()
+  {
+    allTopics = await f2iDataService.GetMainTopics();
+  }
+  //private List<string> allTopics = new List<string> { "Galaxies", "Nebulae", "Clusters", "Planets", "Eclipses", "Moon", "Sunsets", "Auroras", "Landscapes", "Others" } ;
+
+}
+

@@ -1,0 +1,33 @@
+﻿@using Focus2Infinity.Data
+@inject F2IDataService f2iDataService
+
+<h3>@Topic</h3>
+@if (images == null)
+{
+  <h5>Loading...</h5>
+}
+else
+{
+  for (int i = 0; i < images.Count; i += 2)
+  {
+    <div class="row">
+      <Cmp_ImgStory Topic=@Topic Name=@GetImg(i) />
+      @if (i + 1 < images.Count)
+      {
+        <Cmp_ImgStory Topic="Eclipses" Name=@GetImg(i+1) />
+      }
+    </div>
+  }
+}
+
+@code {
+  [Parameter]
+  public string Topic { get; set; }
+  List<string> images;
+  string GetImg(int i) => @$"{images[i]}";
+
+  protected override async Task OnInitializedAsync()
+  {
+    images = await f2iDataService.GetSubTopics(Topic);
+  }
+}

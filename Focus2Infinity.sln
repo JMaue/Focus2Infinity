@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.9.34723.18
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Focus2Infinity", "Focus2Infinity\Focus2Infinity.csproj", "{BA71BDE7-6B61-48B4-859A-9B374D928603}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BA71BDE7-6B61-48B4-859A-9B374D928603}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BA71BDE7-6B61-48B4-859A-9B374D928603}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BA71BDE7-6B61-48B4-859A-9B374D928603}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BA71BDE7-6B61-48B4-859A-9B374D928603}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {F05FD38E-3772-4E24-A3D3-6A4BC29A00C8}
+	EndGlobalSection
+EndGlobal

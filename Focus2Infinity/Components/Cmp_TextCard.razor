@@ -1,0 +1,41 @@
+﻿@using Focus2Infinity.Data
+@inject F2IDataService f2iDataService
+
+@if (_source == null)
+{
+  <h5>Loading...</h5>
+}
+else
+{
+  <div class="row">
+    <h5>@Headline</h5>
+    @foreach (var item in Content)
+    {
+      <div class="row">
+        <div class="col-2">
+          <h7>@item.Key:</h7>
+        </div>
+        <div class="col-8">
+          <h7>@item.Value</h7>
+        </div>
+      </div>
+    }
+  </div>
+}
+
+@code {
+  [Parameter]
+  public string Topic { get; set; }
+
+  [Parameter]
+  public string Src { get; set; }
+
+  private Dictionary<string, string> _source;
+  private string Headline => _source.GetHeadline();
+  private IEnumerable<KeyValuePair<string, string>> Content => _source.GetContent();
+
+  protected override async Task OnInitializedAsync()
+  {
+    _source = await f2iDataService.GetStoryText(Topic, Src);
+  }
+}
