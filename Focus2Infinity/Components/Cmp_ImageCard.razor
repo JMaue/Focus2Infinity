@@ -2,11 +2,10 @@
 @using System.Drawing
 @using System.Drawing.Imaging
 @using System.IO
-@inject NavigationManager Navigation
 
-<a href=@details >
-  <img src=@ImgTbn style="margin: 3px; border: 1px solid white; border-radius: 10px;" />
-</a>
+  <a href=@details>
+    <img src=@ImgTbn style="margin: 3px; border: 1px solid white; border-radius: 10px; max-width: none; max-height: none;" />
+  </a>
 
 @code {
   [Parameter]

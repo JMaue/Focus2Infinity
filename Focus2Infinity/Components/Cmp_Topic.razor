@@ -1,21 +1,20 @@
 ﻿@using Focus2Infinity.Data
 @inject F2IDataService f2iDataService
 
-<h3>@Topic</h3>
+<div class="text-center" style="margin: 50px 10px;">
+  <h3>@Topic</h3>
+</div>
+
 @if (images == null)
 {
   <h5>Loading...</h5>
 }
 else
 {
-  for (int i = 0; i < images.Count; i += 2)
+  for (int i = 0; i < images.Count; i++)
   {
-    <div class="row">
+    <div class="row" style="margin: 50px 10px;">
       <Cmp_ImgStory Topic=@Topic Name=@GetImg(i) />
-      @if (i + 1 < images.Count)
-      {
-        <Cmp_ImgStory Topic=@Topic Name=@GetImg(i+1) />
-      }
     </div>
   }
 }

@@ -1,12 +1,12 @@
 ﻿@using Focus2Infinity.Data
 @inject F2IDataService f2iDataService
 
-  <div class="col-2">
-    <Cmp_ImageCard  Topic=@Topic Img=@Name/>
-  </div>
-  <div class="col-4">
+<div class="col-6 d-flex flex-row justify-content-center">
+  <Cmp_ImageCard Topic=@Topic Img=@Name />
+</div>
+<div class="col-6">
   <Cmp_TextCard Topic=@Topic Src=@Name />
-  </div>
+</div>
 
 
 @code {
