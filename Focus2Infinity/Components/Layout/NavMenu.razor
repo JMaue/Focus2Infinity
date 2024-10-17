@@ -1,32 +1,50 @@
 ﻿@using Focus2Infinity.Data
 @inject F2IDataService f2iDataService
+@rendermode InteractiveServer
 
-<div class="sidebar bg-dark pt-2 h-100">
-  <div class="menu list-group list-group-flush bg-dark pt-5 h-100">
-    @if (allTopics == null)
-    {
-      <h5>Loading...</h5>
-    }
-    else
-    {
-      foreach (var item in allTopics)
+<nav class="navbar navbar-dark bg-dark navbar-expand-md">
+@*   <h1 class="navbar-brand">Focus to Infinity</h1>  *@
+  <NavLink class="navbar-brand" href="/">
+    Focus to Infinity
+  </NavLink>
+  <button class="navbar-toggler" @onclick="ToggleNavMenu">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
+  <div class="navbar-collapse @NavMenuCssClass">
+    <ul class="navbar-nav">
+      @if (allTopics == null)
       {
-        <NavLink class="list-group-item list-group-item-action menu-button" href=@item>
-          @item
-        </NavLink>
+        <h5>Loading...</h5>
       }
-    }
+      else
+      {
+        foreach (var item in allTopics)
+        {
+          <li class="nav-item">
+            <NavLink class="list-group-item list-group-item-action menu-button" href=@item @onclick="ToggleNavMenu">
+              @item
+            </NavLink>
+          </li>
+        }
+      }
+    </ul>
   </div>
-</div>
+</nav>
 
 @code {
+  private bool collapseNavMenu = true;
+  private string NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+
+  private void ToggleNavMenu()
+  {
+    collapseNavMenu = !collapseNavMenu;
+  }
   private List<string> allTopics;
 
   protected override async Task OnInitializedAsync()
   {
     allTopics = await f2iDataService.GetMainTopics();
   }
-  //private List<string> allTopics = new List<string> { "Galaxies", "Nebulae", "Clusters", "Planets", "Eclipses", "Moon", "Sunsets", "Auroras", "Landscapes", "Others" } ;
-
 }
 

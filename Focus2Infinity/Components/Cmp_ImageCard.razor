@@ -4,7 +4,7 @@
 @using System.IO
 @inject NavigationManager Navigation
 
-<a href=@details @onclick="goToImgDetails">
+<a href=@details >
   <img src=@ImgTbn style="margin: 3px; border: 1px solid white; border-radius: 10px;" />
 </a>
 
@@ -18,16 +18,6 @@
   string ImgFile => Path.Combine("img", Topic, Img);
   string ImgTbn => Path.Combine("img", Topic, $"Tbn_{Img}");
   string details => $"/imagedetails/{Topic}/{Img}";
-
-  private void NavigateToImageDetails(MouseEventArgs e)
-  {
-    Navigation.NavigateTo($"/imagedetails/{Uri.EscapeDataString(ImgFile)}");
-  }
-  private void goToImgDetails(MouseEventArgs e)
-  {
-    var x = e.Detail;
-    throw new NotImplementedException();
-  }
 }
 
 

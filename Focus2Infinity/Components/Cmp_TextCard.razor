@@ -30,9 +30,12 @@ else
   [Parameter]
   public string Src { get; set; }
 
+  [Parameter]
+  public bool Details { get; set; } = false;
+
   private Dictionary<string, string> _source;
   private string Headline => _source.GetHeadline();
-  private IEnumerable<KeyValuePair<string, string>> Content => _source.GetContent();
+  private IEnumerable<KeyValuePair<string, string>> Content => Details ? _source.GetDetailedContent() : _source.GetContent();
 
   protected override async Task OnInitializedAsync()
   {
