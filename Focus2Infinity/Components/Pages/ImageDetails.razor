@@ -2,17 +2,18 @@
 @page "/imagedetails/{Topic}/{Name}"
 
 @using System.Web
-@inject NavigationManager Navigation
-
-<h3>Image Details</h3>
+@using Focus2Infinity.Data
+@* @inject NavigationManager Navigation *@
+@inject F2IDataService f2iDataService
 
 @if (!string.IsNullOrEmpty(ImgFile))
 {
+  <h3>@_headline</h3>
   <div class="row">
-    <div class="col-8">
+    <div class="col-12 col-sm-8">
       <img src="@ImgFile" alt="Image" style="max-width: 100%; max-height: 100vh; height: auto;" />
     </div>
-    <div class="col-4">
+    <div class="col-12 col-sm-4">
       <Cmp_TextCard Topic=@Topic Src=@Name Details="true"/>
     </div>
   </div>
@@ -29,4 +30,13 @@ else
   public string Name { get; set; }
 
   private string ImgFile => @$"img/{Topic}/{Name}";
+
+  private string _headline;
+  // private string Headline => _source.GetHeadline();
+
+  protected override async Task OnInitializedAsync()
+  {
+    var src = await f2iDataService.GetStoryText(Topic, Name);
+    _headline = src.GetHeadline();
+  }
 }

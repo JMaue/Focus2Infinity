@@ -28,14 +28,16 @@
 
       await Task.Run(() =>
       {
-        foreach (var f in Directory.EnumerateFiles(htmlFilePath, "*.jpg"))
-        {
-          var fn = Path.GetFileName(f);
-          if (fn.StartsWith("tbn_"))
-            continue;
+        var dirInfo = new DirectoryInfo(htmlFilePath);
 
-          rc.Add(Path.GetFileName(f));
-        }
+        var files = dirInfo.EnumerateFiles("*.*")
+                                 .Where(file => (    file.Extension.Equals(".jpg", StringComparison.OrdinalIgnoreCase) ||
+                                                     file.Extension.Equals(".png", StringComparison.OrdinalIgnoreCase) ||
+                                                     file.Extension.Equals(".tif", StringComparison.OrdinalIgnoreCase))
+                                                 && !file.Name.StartsWith("tbn_"))
+                                 .OrderByDescending(file => file.CreationTime);
+       
+        rc.AddRange (files.Select(file => file.Name));
       });
       return rc;
     }
