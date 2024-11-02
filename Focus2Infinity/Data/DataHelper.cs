@@ -4,6 +4,7 @@
   {
     private static string Headline = "Headline";
     private static string Details = "Details";
+    private static string Date = "Datum";
 
     public static string GetHeadline (this Dictionary<string, string> content)
     {
@@ -12,6 +13,24 @@
         return content[Headline];
       }
       return "";
+    }
+
+    public static DateTime GetDateTime(this Dictionary<string, string> content)
+    {
+      if (content.ContainsKey(Date))
+      {
+        DateTime dt = DateTime.MinValue;
+        try
+        {
+          dt = DateTime.Parse(content[Date]);
+        }
+        catch(Exception e)
+        {
+
+        }
+        return dt;
+      }
+      return DateTime.MinValue;
     }
 
     public static IEnumerable<KeyValuePair<string, string>> GetContent(this Dictionary<string, string> content)

@@ -27,6 +27,6 @@ else
 
   protected override async Task OnInitializedAsync()
   {
-    images = await f2iDataService.GetSubTopics(Topic);
+    images = await f2iDataService.GetSubTopicsSorted(Topic);
   }
 }

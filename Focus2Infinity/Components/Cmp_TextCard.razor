@@ -1,4 +1,5 @@
 ﻿@using Focus2Infinity.Data
+@using Microsoft.AspNetCore.Html
 @inject F2IDataService f2iDataService
 
 @if (_source == null)
@@ -16,7 +17,10 @@ else
           <h7 style="font-weight:bold;">@item.Key:</h7>
         </div>
         <div class="col-12 col-md-9 justify-left">
-          <h7>@item.Value</h7>
+          <h7>
+            @((MarkupString)Unwrap(item.Value))  
+          </h7>
+
         </div>
       </div>
     }
@@ -36,6 +40,8 @@ else
   private Dictionary<string, string> _source;
   private string Headline => _source.GetHeadline();
   private IEnumerable<KeyValuePair<string, string>> Content => Details ? _source.GetDetailedContent() : _source.GetContent();
+
+  private string Unwrap(string value) => f2iDataService.Unwrap(value);
 
   protected override async Task OnInitializedAsync()
   {

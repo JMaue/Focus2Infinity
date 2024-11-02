@@ -1,7 +1,32 @@
 ﻿@page "/"
+@using Focus2Infinity.Data
+@inject F2IDataService f2iDataService
 
 <PageTitle>Home</PageTitle>
 
-<h1>Hello, world!</h1>
+@if (images == null)
+{
+  <h5>Loading...</h5>
+}
+else
+{
+  for (int i = 0; i < images.Count; i++)
+  {
+    <div class="row" style="margin: 50px 10px;">
+      <Cmp_ImgStory Topic=@GetTopic(i) Name=@GetImg(i) />
+    </div>
+  }
+}
 
-Welcome to your new app.
+@code {
+  [Parameter]
+  public string Topic { get; set; }
+  List<Tuple<string, string>> images;
+  string GetImg(int i) => @$"{images[i].Item1}";
+  string GetTopic(int i) => @$"{images[i].Item2}";
+
+  protected override async Task OnInitializedAsync()
+  {
+    images = await f2iDataService.GetAllTopics();
+  }
+}
