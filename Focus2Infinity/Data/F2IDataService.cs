@@ -3,6 +3,7 @@
   using System.Collections.Generic;
   using System.Text.Json;
   using System.Text.RegularExpressions;
+  using System.Drawing;
 
   public class F2IDataService
   {
@@ -115,6 +116,34 @@
       return kvp;
     }
 
+    public async Task<(int width, int height)> GetImageFormat (string topic, string src)
+    {
+      int width = 0;
+      int height = 0;
+      await Task.Run(() =>
+      {
+        (width, height) = DoGetImageFormat(topic, src);
+      });
+
+      return (width, height);
+    }
+
+    public (int width, int height) DoGetImageFormat(string topic, string src)
+    {
+      var root = _hostingEnvironment.WebRootPath;
+      string imgFilePath = $"{Path.Combine(root, "img", topic, src)}";
+
+      if (File.Exists(imgFilePath))
+      {
+        using (Image image = Image.FromFile(imgFilePath))
+        {
+          return (image.Width, image.Height);
+        }
+      }
+
+      return (0, 0);
+    }
+
     public Dictionary<string, string> DoGetStoryText(string topic, string src)
     {
       Dictionary<string, string> keyValuePairs = new Dictionary<string, string>();
@@ -138,42 +167,9 @@
       // <a href="https://www.abenteuer-sterne.de" target="_blank">Abenteuer-Sterne</a>
 
       string pattern = @"##(.*?)##";
-      string replacement = "<a target='_blank' href=https://$1>$1</a>";
+      string replacement = "<a target='_blank' href=https://$1><span style='color:aliceblue; font-weight:bold'>$1</span></a>";
 
       string result = Regex.Replace(input, pattern, replacement);
-      return result;
-    }
-
-    public IEnumerable<string> Unwrap2(string input)
-    {
-      var result = new List<string>();
-      string pattern = @"##(.*?)##";
-      var matches = Regex.Matches(input, pattern);
-
-      int lastIndex = 0;
-
-      foreach (Match match in matches)
-      {
-        // Text vor dem ersten Vorkommen von '##'
-        if (match.Index > lastIndex)
-        {
-          result.Add(input.Substring(lastIndex, match.Index - lastIndex));
-        }
-
-        // Konvertierter <a ..> Knoten
-        string replacement = $"<a target='_blank' href='https://{match.Groups[1].Value}'>{match.Groups[1].Value}</a>";
-        result.Add(replacement);
-
-        // Aktualisiere den letzten Index
-        lastIndex = match.Index + match.Length;
-      }
-
-      // Text nach dem letzten Vorkommen von '##'
-      if (lastIndex < input.Length)
-      {
-        result.Add(input.Substring(lastIndex));
-      }
-
       return result;
     }
   }

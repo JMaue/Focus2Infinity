@@ -14,11 +14,11 @@
   public string Topic { get; set; }
 
   [Parameter]
-  public string Img { get; set; }
+  public string Src { get; set; }
 
-  string ImgFile => Path.Combine("img", Topic, Img);
-  string ImgTbn => Path.Combine("img", Topic, $"Tbn_{Img}");
-  string details => $"/imagedetails/{Topic}/{Img}";
+  string ImgFile => Path.Combine("img", Topic, Src);
+  string ImgTbn => Path.Combine("img", Topic, $"Tbn_{Src}");
+  string details => $"/imagedetails/{Topic}/{Src}";
 }
 
 

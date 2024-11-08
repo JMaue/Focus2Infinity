@@ -1,0 +1,32 @@
+﻿@using Focus2Infinity.Data
+@inject F2IDataService f2iDataService
+
+@if (_source != null)
+{
+  <Cmp_ImageCard Topic=@Topic Src=@Src />
+  <a href=@details><h5 style="color:aliceblue">@Headline</h5> </a>
+}
+else
+{
+  <p>Loading...</p>
+}
+
+
+@code {
+  [Parameter]
+  public string Topic { get; set; }
+
+  [Parameter]
+  public string Src { get; set; }
+
+  private Dictionary<string, string>? _source = null;
+  private string Headline => _source.GetHeadline();
+  string details => $"/imagedetails/{Topic}/{Src}";
+
+  private string Unwrap(string value) => f2iDataService.Unwrap(value);
+
+  protected override async Task OnInitializedAsync()
+  {
+    _source = await f2iDataService.GetStoryText(Topic, Src);
+  }
+}

@@ -10,12 +10,16 @@
 }
 else
 {
-  for (int i = 0; i < images.Count; i++)
+  <div class="row">
+  
+  @for (int i = 0; i < images.Count; i++)
   {
-    <div class="row" style="margin: 50px 10px;">
-      <Cmp_ImgStory Topic=@GetTopic(i) Name=@GetImg(i) />
-    </div>
+      <div class="col-12 col-sm-6 col-lg-3 col-xxl-2" style="margin: 50px 10px;">
+      <Cmp_ImgHead Topic=@GetTopic(i) Src=@GetImg(i) />
+      </div>
   }
+  
+  </div>
 }
 
 @code {
