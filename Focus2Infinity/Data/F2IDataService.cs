@@ -17,7 +17,7 @@
     public async Task<List<string>> GetMainTopics()
     {
       var rc = new List<string>();
-      await Task.Run(() => { rc.AddRange(new string[] { "Galaxies", "Nebulae", "Clusters", "Planets", "Eclipses", "Milkyway", "Moon", "Sun", "Sunsets", "Auroras", "Landscapes", "Others" }); });
+      await Task.Run(() => { rc.AddRange(new string[] { "Galaxies", "Nebulae", "Clusters", "Planets", "Eclipses", "Milkyway", "Moon", "Sun", "Sunsets", "Comets", "Landscapes", "Others" }); });
       return rc;
     }
 
@@ -167,7 +167,7 @@
       // <a href="https://www.abenteuer-sterne.de" target="_blank">Abenteuer-Sterne</a>
 
       string pattern = @"##(.*?)##";
-      string replacement = "<a target='_blank' href=https://$1><span style='color:aliceblue; font-weight:bold'>$1</span></a>";
+      string replacement = "<a target='_blank' href=https://$1><span style='color:azure; font-weight:bold; text-decoration: none;'>$1</span></a>";
 
       string result = Regex.Replace(input, pattern, replacement);
       return result;
