@@ -161,6 +161,25 @@
       return keyValuePairs;
     }
 
+    public async Task<bool> OverlayExists(string topic, string src)
+    { 
+      bool rc = false;
+      await Task.Run(() =>
+      {
+        rc = DoOverlayExists(topic, src);
+      });
+
+      return rc;
+    }
+
+    private bool DoOverlayExists(string topic, string src)
+    {
+      var root = _hostingEnvironment.WebRootPath;
+      string htmlFilePath = $"{Path.Combine(root, "img", topic, $"ovl_{src}")}";
+
+      return File.Exists(htmlFilePath);
+    }
+
     public string Unwrap (string input)
     {
       // ##https://www.abenteuer-sterne.de##

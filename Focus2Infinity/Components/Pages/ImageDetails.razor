@@ -5,12 +5,17 @@
 @using Focus2Infinity.Data
 @inject F2IDataService f2iDataService
 
+@rendermode InteractiveServer
+
 @if (_headline != null)
 {
   <h3 class="text-center my-5">@_headline</h3>
   <div class="row">
-    <div class=@ColSizeImg>
-      <img src="@ImgFile" alt="Image" style="max-width: 100%; max-height: 100vh; height: auto;" />
+    <div class="@ColSizeImg" @onmouseover="ShowOverlayImage" @onmouseout="HideOverlayImage">
+      @{
+        string img = _overlayExists && _showOverlay ? OverlayImgFile : ImgFile;
+        <img src="@img" alt="Image"style="max-width: 100%; height: auto; object-fit: contain;" />
+      }
     </div>
     <div class=@ColSizeTxt>
       <Cmp_TextCard Topic=@Topic Src=@Name Details="true"/>
@@ -29,6 +34,7 @@ else
   public string Name { get; set; }
 
   private string ImgFile => @$"img/{Topic}/{Name}";
+  private string OverlayImgFile => @$"img/{Topic}/ovl_{Name}";
   private string CSI => _portrait ? "col-sm-6" : "col-sm-8";
   private string ColSizeImg => $"col-12 {CSI} d-flex justify-content-end";
   private string CST => _portrait ? "col-sm-6" : "col-sm-4";
@@ -37,6 +43,9 @@ else
   private string _headline;
   private bool _portrait = false;
 
+  private bool _showOverlay = false;
+  private bool _overlayExists = false;
+
   protected override async Task OnInitializedAsync()
   {
     var src = await f2iDataService.GetStoryText(Topic, Name);
@@ -44,5 +53,11 @@ else
 
     (int width, int heigth) = await f2iDataService.GetImageFormat(Topic, Name);
     _portrait = width < heigth;
+
+    _overlayExists = await f2iDataService.OverlayExists(Topic, Name);
   }
+
+  private void ShowOverlayImage(MouseEventArgs args) => _showOverlay = true;
+
+  private void HideOverlayImage() => _showOverlay = false;
 }
