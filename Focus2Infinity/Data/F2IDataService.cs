@@ -73,7 +73,8 @@
                                .Where(file => (file.Extension.Equals(".jpg", StringComparison.OrdinalIgnoreCase) ||
                                                file.Extension.Equals(".png", StringComparison.OrdinalIgnoreCase) ||
                                                file.Extension.Equals(".tif", StringComparison.OrdinalIgnoreCase))
-                                               && !file.Name.StartsWith("tbn_"));
+                                               && !file.Name.StartsWith("tbn_")
+                                               && !file.Name.StartsWith("ovl_"));
       return rc;
     }
 
@@ -180,16 +181,28 @@
       return File.Exists(htmlFilePath);
     }
 
-    public string Unwrap (string input)
+    public string Unwrap(string input)
     {
+      // https://de.wikipedia.org/wiki/Deneb
+      string pattern1 = @"###(.*?)###(.*?)###";
+
+      if (Regex.IsMatch(input, pattern1))
+      {
+        string replacement1 = "<a target='_blank' href=https://$2><span style='color:azure; font-weight:bold; text-decoration: none;'>$1</span></a>";
+
+        string result1 = Regex.Replace(input, pattern1, replacement1);
+        return result1;
+      }
+
       // ##https://www.abenteuer-sterne.de##
       // <a href="https://www.abenteuer-sterne.de" target="_blank">Abenteuer-Sterne</a>
 
-      string pattern = @"##(.*?)##";
-      string replacement = "<a target='_blank' href=https://$1><span style='color:azure; font-weight:bold; text-decoration: none;'>$1</span></a>";
+      string pattern2 = @"##(.*?)##";
+      string replacement2 = "<a target='_blank' href=https://$1><span style='color:azure; font-weight:bold; text-decoration: none;'>$1</span></a>";
 
-      string result = Regex.Replace(input, pattern, replacement);
-      return result;
+      string result2 = Regex.Replace(input, pattern2, replacement2);
+      return result2;
+
     }
   }
 }
