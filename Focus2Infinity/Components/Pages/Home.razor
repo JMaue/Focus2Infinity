@@ -26,8 +26,8 @@ else
   [Parameter]
   public string Topic { get; set; }
   List<Tuple<string, string>> images;
-  string GetImg(int i) => @$"{images[i].Item1}";
-  string GetTopic(int i) => @$"{images[i].Item2}";
+  string GetImg(int i) => $"{images[i].Item1}";
+  string GetTopic(int i) => $"{images[i].Item2}";
 
   protected override async Task OnInitializedAsync()
   {

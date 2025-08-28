@@ -23,7 +23,7 @@ else
   [Parameter]
   public string Topic { get; set; }
   List<string> images;
-  string GetImg(int i) => @$"{images[i]}";
+  string GetImg(int i) => $"{images[i]}";
 
   protected override async Task OnInitializedAsync()
   {
