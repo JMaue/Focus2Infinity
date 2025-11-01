@@ -5,7 +5,7 @@
   <Cmp_ImageCard Topic=@Topic Src=@Name />
 </div>
 <div class="col-12 col-sm-6 ">
-  <Cmp_TextCard Topic=@Topic Src=@Name />
+  <Cmp_TextCard Topic=@Topic Src=@Name HasOverlay="@_hasOverlayImg" />
 </div>
 
 
@@ -15,4 +15,11 @@
 
   [Parameter]
   public string Name { get; set; }
+
+  private bool _hasOverlayImg = false;
+
+  protected override async Task OnInitializedAsync()
+  {
+    _hasOverlayImg = await f2iDataService.OverlayExists(Topic, Name);
+  }
 }

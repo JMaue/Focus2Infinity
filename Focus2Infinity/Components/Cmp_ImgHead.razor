@@ -19,8 +19,8 @@ else
   [Parameter]
   public string Src { get; set; }
 
-  private Dictionary<string, string>? _source = null;
-  private string Headline => _source.GetHeadline();
+  private ImageStory? _source = null;
+  private string Headline => _source?.Headline ?? "Headline";
   string details => $"/imagedetails/{Topic}/{Src}";
 
   private string Unwrap(string value) => f2iDataService.Unwrap(value);

@@ -51,7 +51,7 @@
         var src = GetStoryText(mainTopic, f.Name).Result;
         if (src != null)
         {
-          list.Add(new Tuple<DateTime, string>(src.GetDateTime(), f.Name));
+          list.Add(new Tuple<DateTime, string>(src.DateTaken, f.Name));
         }
         else
         {
@@ -78,9 +78,9 @@
       return rc;
     }
 
-    public async Task<List<Tuple<string, string>>> GetAllTopics()
+    public async Task<List<ImageItem>> GetAllTopics()
     {
-      List<Tuple<string, string>> rc = new List<Tuple<string, string>>();
+      List<ImageItem> rc = new List<ImageItem>();
       
       await Task.Run(() =>
       {
@@ -97,7 +97,7 @@
 
         foreach (var kvp in allTopics.OrderByDescending(kvp => kvp.Item1))
         {
-          rc.Add(new Tuple<string, string>(kvp.Item2, kvp.Item3));
+          rc.Add(new ImageItem (kvp.Item2, kvp.Item3));
         }
       });
 
@@ -105,16 +105,15 @@
       return rc;
     }
 
-    public async Task<Dictionary<string, string>> GetStoryText(string topic, string src)
+    public async Task<ImageStory> GetStoryText(string topic, string src)
     {
-      Dictionary<string, string> kvp = new Dictionary<string, string>();
+      ImageStory? rc = null;
       await Task.Run(() =>
       {
-        kvp = DoGetStoryText(topic, src);
-       
+        rc = DoGetStoryText(topic, src);
       });
 
-      return kvp;
+      return rc ?? new ImageStory ("{}");
     }
 
     public async Task<(int width, int height)> GetImageFormat (string topic, string src)
@@ -145,9 +144,8 @@
       return (0, 0);
     }
 
-    public Dictionary<string, string> DoGetStoryText(string topic, string src)
+    public ImageStory? DoGetStoryText(string topic, string src)
     {
-      Dictionary<string, string> keyValuePairs = new Dictionary<string, string>();
       var root = _hostingEnvironment.WebRootPath;
       string htmlFilePath = $"{Path.Combine(root, "img", topic, src)}.json";
 
@@ -156,10 +154,10 @@
         string jsonString = File.ReadAllText(htmlFilePath);
 
         // Deserialisieren in eine Liste von Dictionary-Einträgen
-        keyValuePairs = JsonSerializer.Deserialize<Dictionary<string, string>>(jsonString);
+        return new ImageStory (jsonString);
       }
 
-      return keyValuePairs;
+      return null;
     }
 
     public async Task<bool> OverlayExists(string topic, string src)

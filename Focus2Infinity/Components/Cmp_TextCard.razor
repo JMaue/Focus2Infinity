@@ -36,9 +36,23 @@ else
   [Parameter]
   public bool Details { get; set; } = false;
 
-  private Dictionary<string, string> _source;
-  private string Headline => _source.GetHeadline();
-  private IEnumerable<KeyValuePair<string, string>> Content => Details ? _source.GetDetailedContent() : _source.GetContent();
+  [Parameter]
+  public bool HasOverlay { get; set; } = false;
+
+  private ImageStory? _source;
+  private string Headline
+  {
+    get
+    {
+      if (HasOverlay)
+      {
+        return $"{_source?.Headline} *";
+      }
+      return _source?.Headline ?? "Headline";
+    }
+  }
+
+  private IEnumerable<KeyValuePair<string, string>> Content => Details ? _source.DetailedContent : _source.Content;
 
   private string Unwrap(string value) => f2iDataService.Unwrap(value);
 
