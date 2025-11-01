@@ -1,5 +1,7 @@
 ﻿@using Focus2Infinity.Data
 @inject F2IDataService f2iDataService
+@inject IStringLocalizer<NavMenu> L
+
 @rendermode InteractiveServer
 
 <nav class="navbar navbar-dark navbar-expand-md">
@@ -14,20 +16,23 @@
     <ul class="navbar-nav">
       @if (allTopics == null)
       {
-        <h5>Loading...</h5>
+        <h5>@L["Loading"]</h5>
       }
       else
       {
         foreach (var item in allTopics)
         {
           <li class="nav-item">
-            <NavLink class="list-group-item list-group-item-action menu-button" href=@item @onclick="ToggleNavMenu">
-              @item
+            <NavLink class="list-group-item list-group-item-action menu-button text-nowrap" href=@item.Key @onclick="ToggleNavMenu">
+              @item.Value
             </NavLink>
           </li>
         }
       }
     </ul>
+    <div class="d-flex">
+      <LanguageSwitcher />
+    </div>
   </div>
 </nav>
 
@@ -39,11 +44,17 @@
   {
     collapseNavMenu = !collapseNavMenu;
   }
-  private List<string> allTopics;
+  private Dictionary<string, string>? allTopics;
 
   protected override async Task OnInitializedAsync()
   {
-    allTopics = await f2iDataService.GetMainTopics();
+    var topics = await f2iDataService.GetMainTopics();
+    foreach (var topic in topics)
+    {
+      allTopics ??= new Dictionary<string, string>();
+      var ls = L[topic];
+      allTopics[topic] = ls.ResourceNotFound ? topic : ls.Value;
+    }
   }
 }
 

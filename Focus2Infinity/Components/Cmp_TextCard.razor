@@ -1,10 +1,12 @@
 ﻿@using Focus2Infinity.Data
 @using Microsoft.AspNetCore.Html
+@using Microsoft.Extensions.Localization
 @inject F2IDataService f2iDataService
+@inject IStringLocalizer<Cmp_TextCard> L
 
 @if (_source == null)
 {
-  <h5>Loading...</h5>
+  <h5>@L["Loading"]</h5>
 }
 else
 {
@@ -48,7 +50,7 @@ else
       {
         return $"{_source?.Headline} *";
       }
-      return _source?.Headline ?? "Headline";
+      return _source?.Headline ?? L["Headline"];
     }
   }
 

@@ -3,7 +3,9 @@
 
 @using System.Web
 @using Focus2Infinity.Data
+@using Microsoft.Extensions.Localization
 @inject F2IDataService f2iDataService
+@inject IStringLocalizer<ImageDetails> L
 
 @rendermode InteractiveServer
 
@@ -24,7 +26,7 @@
 }
 else
 {
-  <p>No image file provided.</p>
+  <p>@L["Loading"]</p>
 }
 
 @code {

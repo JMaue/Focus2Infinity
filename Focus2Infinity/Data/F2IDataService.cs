@@ -1,9 +1,9 @@
 ﻿namespace Focus2Infinity.Data
 {
   using System.Collections.Generic;
-  using System.Text.Json;
-  using System.Text.RegularExpressions;
   using System.Drawing;
+  using System.Globalization;
+  using System.Text.RegularExpressions;
 
   public class F2IDataService
   {
@@ -107,10 +107,11 @@
 
     public async Task<ImageStory> GetStoryText(string topic, string src)
     {
+      var ui = CultureInfo.CurrentUICulture; // capture once
       ImageStory? rc = null;
       await Task.Run(() =>
       {
-        rc = DoGetStoryText(topic, src);
+        rc = DoGetStoryText(topic, src, ui);
       });
 
       return rc ?? new ImageStory ("{}");
@@ -144,10 +145,13 @@
       return (0, 0);
     }
 
-    public ImageStory? DoGetStoryText(string topic, string src)
+    public ImageStory? DoGetStoryText(string topic, string src, CultureInfo ui)
     {
-      var root = _hostingEnvironment.WebRootPath;
-      string htmlFilePath = $"{Path.Combine(root, "img", topic, src)}.json";
+      var htmlFilePath = ResolveStoryJsonPath(topic, src, ui);
+      if (htmlFilePath is null)
+      {
+        return null;
+      }
 
       if (File.Exists(htmlFilePath))
       {
@@ -155,6 +159,28 @@
 
         // Deserialisieren in eine Liste von Dictionary-Einträgen
         return new ImageStory (jsonString);
+      }
+
+      return null;
+    }
+
+    private string? ResolveStoryJsonPath(string topic, string src, CultureInfo ui)
+    {
+      var root = _hostingEnvironment.WebRootPath;
+      var baseWithoutJson = Path.Combine(root, "img", topic, src); // e.g., M13.jpg
+
+      // Try: exact culture -> language -> neutral
+      var candidates = new[]
+      {
+        $"{baseWithoutJson}.{ui.Name}.json",                  // M13.jpg.de-DE.json
+        $"{baseWithoutJson}.{ui.TwoLetterISOLanguageName}.json", // M13.jpg.de.json
+        $"{baseWithoutJson}.json"                          // M13.jpg.json
+      };
+
+      foreach (var candidate in candidates)
+      {
+        if (File.Exists(candidate))
+          return candidate;
       }
 
       return null;

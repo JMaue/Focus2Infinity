@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Simple stylized USA flag (not exact proportions) -->
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="336" viewBox="0 0 640 336" aria-label="Flag of the United States" role="img">
+  <defs>
+    <clipPath id="clip">
+      <rect width="640" height="336"/>
+    </clipPath>
+  </defs>
+  <g clip-path="url(#clip)">
+    <!-- 13 stripes -->
+    <rect width="640" height="336" fill="#b22234"/>
+    <g fill="#ffffff">
+      <rect y="26" width="640" height="26"/>
+      <rect y="78" width="640" height="26"/>
+      <rect y="130" width="640" height="26"/>
+      <rect y="182" width="640" height="26"/>
+      <rect y="234" width="640" height="26"/>
+      <rect y="286" width="640" height="26"/>
+    </g>
+    <!-- canton -->
+    <rect width="280" height="182" fill="#3c3b6e"/>
+    <!-- simple stars grid -->
+    <g fill="#ffffff">
+      <!-- 6x5 grid of small circles as stars (stylized) -->
+      <g transform="translate(20,18)">
+        <g>
+          <circle cx="0" cy="0" r="5"/>
+          <circle cx="40" cy="0" r="5"/>
+          <circle cx="80" cy="0" r="5"/>
+          <circle cx="120" cy="0" r="5"/>
+          <circle cx="160" cy="0" r="5"/>
+          <circle cx="200" cy="0" r="5"/>
+        </g>
+        <g transform="translate(20,18)">
+          <circle cx="0" cy="0" r="5"/>
+          <circle cx="40" cy="0" r="5"/>
+          <circle cx="80" cy="0" r="5"/>
+          <circle cx="120" cy="0" r="5"/>
+          <circle cx="160" cy="0" r="5"/>
+        </g>
+        <g transform="translate(0,36)">
+          <circle cx="0" cy="0" r="5"/>
+          <circle cx="40" cy="0" r="5"/>
+          <circle cx="80" cy="0" r="5"/>
+          <circle cx="120" cy="0" r="5"/>
+          <circle cx="160" cy="0" r="5"/>
+          <circle cx="200" cy="0" r="5"/>
+        </g>
+        <g transform="translate(20,54)">
+          <circle cx="0" cy="0" r="5"/>
+          <circle cx="40" cy="0" r="5"/>
+          <circle cx="80" cy="0" r="5"/>
+          <circle cx="120" cy="0" r="5"/>
+          <circle cx="160" cy="0" r="5"/>
+        </g>
+        <g transform="translate(0,72)">
+          <circle cx="0" cy="0" r="5"/>
+          <circle cx="40" cy="0" r="5"/>
+          <circle cx="80" cy="0" r="5"/>
+          <circle cx="120" cy="0" r="5"/>
+          <circle cx="160" cy="0" r="5"/>
+          <circle cx="200" cy="0" r="5"/>
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>

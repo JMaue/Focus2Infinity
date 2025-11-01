@@ -1,13 +1,15 @@
 ﻿@page "/"
 @using Focus2Infinity.Data
+@using Microsoft.Extensions.Localization
 @inject F2IDataService f2iDataService
+@inject IStringLocalizer<Home> L
 
-<PageTitle>Home</PageTitle>
+<PageTitle>@L["Home"]</PageTitle>
 
 <ErrorBoundary>
 @if (images == null)
 {
-  <h5>Loading...</h5>
+  <h5>@L["Loading"]</h5>
 }
 else
 {
@@ -20,7 +22,7 @@ else
 
         <div class="col-12 col-sm-6 col-lg-3 col-xxl-2 image-tile" @key="src">
           <Cmp_ImgHead Topic="@topic" Src="@src" />
-        </div>
+          </div>
       }
   
   </div>

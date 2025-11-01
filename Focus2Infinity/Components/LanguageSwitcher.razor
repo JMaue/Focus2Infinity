@@ -1,0 +1,38 @@
+@using System.Globalization
+@inject NavigationManager Nav
+
+<select class="form-select form-select-sm" style="@SelectStyle" @bind="selected" @bind:after="OnCultureChanged" aria-label="Language selector">
+  <option value="en">English</option>
+  <option value="de">Deutsch</option>
+  <option value="nl">Nederlands</option>
+  <option value="fr">Français</option>
+</select>
+
+@code {
+  private string selected = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName switch
+  {
+    "de" => "de",
+    "nl" => "nl",
+    "fr" => "fr",
+    _ => "en"
+  };
+
+  private string FlagPath => selected switch
+  {
+    "de" => "flags/germany.svg",
+    "nl" => "flags/netherlands.svg",
+    "fr" => "flags/france.svg",
+    _ => "flags/usa.svg"
+  };
+
+  // Display the selected flag inside the select on the right side and match dark page background
+  private string SelectStyle =>
+    $"background-image: url('{FlagPath}'); background-repeat: no-repeat; background-position: right .6rem center; background-size: 1.25rem auto; padding-right: 2rem; background-color: #000; color: #fff; border-color: #444;";
+
+  private void OnCultureChanged()
+  {
+    var culture = selected;
+    var returnUrl = Uri.EscapeDataString(Nav.Uri);
+    Nav.NavigateTo($"/set-language?culture={culture}&returnUrl={returnUrl}", forceLoad: true);
+  }
+}

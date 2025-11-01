@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+
+  <data name="Loading" xml:space="preserve"><value>Laden...</value></data>
+
+  <data name="Galaxies" xml:space="preserve"><value>Melkwegstelsels</value></data>
+  <data name="Nebulae" xml:space="preserve"><value>Nebulae</value></data>
+  <data name="Clusters" xml:space="preserve"><value>Clusters</value></data>
+  <data name="Planets" xml:space="preserve"><value>Planeten</value></data>
+  <data name="Eclipses" xml:space="preserve"><value>Eclipsen</value></data>
+  <data name="Milkyway" xml:space="preserve"><value>Melkweg</value></data>
+  <data name="Moon" xml:space="preserve"><value>Maan</value></data>
+  <data name="Sun" xml:space="preserve"><value>Zon</value></data>
+  <data name="Sunsets" xml:space="preserve"><value>Zonsondergangen</value></data>
+  <data name="Comets" xml:space="preserve"><value>Kometen</value></data>
+  <data name="Landscapes" xml:space="preserve"><value>Landschappen</value></data>
+  <data name="StarTrails" xml:space="preserve"><value>Sterrensporen</value></data>
+  <data name="Others" xml:space="preserve"><value>Overige</value></data>
+</root>
