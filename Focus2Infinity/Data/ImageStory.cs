@@ -14,7 +14,8 @@ namespace Focus2Infinity.Data
 
     private static string C_Headline = "Headline";
     private static string C_Details = "Details";
-    private static string C_Date = "Datum";
+    private static string C_Date1 = "Datum";
+    private static string C_Date2 = "Date";
 
     public string Headline
     {
@@ -24,7 +25,8 @@ namespace Focus2Infinity.Data
         {
           return _metaDescription[C_Headline];
         }
-        return "";
+        else 
+          return "";
       }
     }
 
@@ -32,12 +34,15 @@ namespace Focus2Infinity.Data
     {
       get
       {
-        if (_metaDescription != null && _metaDescription.ContainsKey(C_Date))
+        if (_metaDescription != null)
         {
           DateTime dt = DateTime.MinValue;
           try
           {
-            dt = DateTime.Parse(_metaDescription[C_Date]);
+            if (_metaDescription.ContainsKey(C_Date1))
+              dt = DateTime.Parse(_metaDescription[C_Date1]);
+            else if (_metaDescription.ContainsKey(C_Date2))
+              dt = DateTime.Parse(_metaDescription[C_Date2]);
           }
           catch (Exception e)
           {
