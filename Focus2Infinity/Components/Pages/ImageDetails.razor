@@ -3,9 +3,10 @@
 
 @using System.Web
 @using Focus2Infinity.Data
+@using Focus2Infinity
 @using Microsoft.Extensions.Localization
 @inject F2IDataService f2iDataService
-@inject IStringLocalizer<ImageDetails> L
+@inject IStringLocalizer<SharedResource> L
 
 @rendermode InteractiveServer
 
@@ -57,7 +58,7 @@ else
 
     _hasOverlayImg = await f2iDataService.OverlayExists(Topic, Name);
 
-    _headline = src.Headline;
+    _headline = src.GetHeadline ();
   }
 
   private void ShowOverlayImage(MouseEventArgs args) => _showOverlay = true;

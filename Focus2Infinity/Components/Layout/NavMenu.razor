@@ -1,6 +1,7 @@
 ﻿@using Focus2Infinity.Data
+@using Focus2Infinity
 @inject F2IDataService f2iDataService
-@inject IStringLocalizer<NavMenu> L
+@inject IStringLocalizer<SharedResource> L
 
 @rendermode InteractiveServer
 
@@ -16,7 +17,8 @@
     <ul class="navbar-nav">
       @if (allTopics == null)
       {
-        <h5>@L["Loading"]</h5>
+@*         <h5>@L["Loading"]</h5> *@
+        <h5>Loading...</h5>
       }
       else
       {
@@ -51,9 +53,12 @@
     var topics = await f2iDataService.GetMainTopics();
     foreach (var topic in topics)
     {
+      var c1 = Thread.CurrentThread.CurrentCulture;
+      var c2 = Thread.CurrentThread.CurrentUICulture;
       allTopics ??= new Dictionary<string, string>();
-      var ls = L[topic];
-      allTopics[topic] = ls.ResourceNotFound ? topic : ls.Value;
+      var ls = L.GetString(topic);
+
+      allTopics[topic] = ls; // ls.ResourceNotFound ? topic : ls.Value;
     }
   }
 }

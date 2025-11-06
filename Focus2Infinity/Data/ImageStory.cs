@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using Microsoft.Extensions.Localization;
+using System.Text.Json;
 
 namespace Focus2Infinity.Data
 {
@@ -14,44 +15,37 @@ namespace Focus2Infinity.Data
 
     private static string C_Headline = "Headline";
     private static string C_Details = "Details";
-    private static string C_Date1 = "Datum";
-    private static string C_Date2 = "Date";
+    private static string C_Date = "Datum";
 
-    public string Headline
+    public string GetHeadline()
     {
-      get
+      if (_metaDescription != null && _metaDescription.ContainsKey(C_Headline))
       {
-        if (_metaDescription != null && _metaDescription.ContainsKey(C_Headline))
-        {
-          return _metaDescription[C_Headline];
-        }
-        else 
-          return "";
+        return _metaDescription[C_Headline];
       }
+      else
+        return "";
     }
 
-    public DateTime DateTaken
-    {
-      get
-      {
-        if (_metaDescription != null)
-        {
-          DateTime dt = DateTime.MinValue;
-          try
-          {
-            if (_metaDescription.ContainsKey(C_Date1))
-              dt = DateTime.Parse(_metaDescription[C_Date1]);
-            else if (_metaDescription.ContainsKey(C_Date2))
-              dt = DateTime.Parse(_metaDescription[C_Date2]);
-          }
-          catch (Exception e)
-          {
 
-          }
-          return dt;
+    public DateTime GetDateTaken (IStringLocalizer localizer)
+    {
+      if (_metaDescription != null)
+      {
+        DateTime dt = DateTime.MinValue;
+        try
+        {
+        var lkey = localizer[C_Date].Value;
+        if (_metaDescription.ContainsKey(lkey))
+          dt = DateTime.Parse(_metaDescription[lkey]);
         }
-        return DateTime.MinValue;
+        catch (Exception e)
+        {
+
+        }
+        return dt;
       }
+      return DateTime.MinValue;
     }
 
     public IEnumerable<KeyValuePair<string, string>> Content
@@ -63,7 +57,7 @@ namespace Focus2Infinity.Data
 
         foreach (var key in _metaDescription.Keys)
         {
-          if (key == Headline || key == C_Details)
+          if (key == "Headline" || key == C_Details)
             continue;
 
           yield return new KeyValuePair<string, string>(key, _metaDescription[key]);

@@ -1,8 +1,9 @@
 ﻿@using Focus2Infinity.Data
+@using Focus2Infinity
 @using Microsoft.AspNetCore.Html
 @using Microsoft.Extensions.Localization
 @inject F2IDataService f2iDataService
-@inject IStringLocalizer<Cmp_TextCard> L
+@inject IStringLocalizer<SharedResource> L
 
 @if (_source == null)
 {
@@ -46,11 +47,12 @@ else
   {
     get
     {
+      var headline = _source?.GetHeadline();
       if (HasOverlay)
       {
-        return $"{_source?.Headline} *";
+        return $"{headline} *";
       }
-      return _source?.Headline ?? L["Headline"];
+      return headline;
     }
   }
 

@@ -1,4 +1,5 @@
 ﻿@using Focus2Infinity.Data
+@using Focus2Infinity
 @inject F2IDataService f2iDataService
 
 @if (_source != null)
@@ -11,7 +12,6 @@ else
   <p>L[Loading]</p>
 }
 
-
 @code {
   [Parameter]
   public string Topic { get; set; }
@@ -20,7 +20,7 @@ else
   public string Src { get; set; }
 
   private ImageStory? _source = null;
-  private string Headline => _source?.Headline ?? "Headline";
+  private string Headline => _source?.GetHeadline ();
   string details => $"/imagedetails/{Topic}/{Src}";
 
   private string Unwrap(string value) => f2iDataService.Unwrap(value);

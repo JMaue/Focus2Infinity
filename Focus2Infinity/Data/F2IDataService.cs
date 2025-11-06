@@ -1,5 +1,6 @@
 ﻿namespace Focus2Infinity.Data
 {
+  using Microsoft.Extensions.Localization;
   using System.Collections.Generic;
   using System.Drawing;
   using System.Globalization;
@@ -21,13 +22,13 @@
       return rc;
     }
 
-    public async Task<List<string>> GetSubTopicsSorted(string mainTopic)
+    public async Task<List<string>> GetSubTopicsSorted(string mainTopic, IStringLocalizer L)
     {
       var rc = new List<string>();
       await Task.Run(() =>
       {
         var files = GetSubTopics(mainTopic);
-        var list = AnnotateWithDate(files, mainTopic);
+        var list = AnnotateWithDate(files, mainTopic, L);
         rc = ToSortedList(list);
       });
       return rc;
@@ -43,7 +44,7 @@
       return rc;
     }
 
-    private List<Tuple<DateTime, string>> AnnotateWithDate(IEnumerable<FileInfo> files, string mainTopic)
+    private List<Tuple<DateTime, string>> AnnotateWithDate(IEnumerable<FileInfo> files, string mainTopic, IStringLocalizer L)
     {
       var list = new List<Tuple<DateTime, string>>();
       foreach (var f in files)
@@ -51,7 +52,7 @@
         var src = GetStoryText(mainTopic, f.Name).Result;
         if (src != null)
         {
-          list.Add(new Tuple<DateTime, string>(src.DateTaken, f.Name));
+          list.Add(new Tuple<DateTime, string>(src.GetDateTaken (L), f.Name));
         }
         else
         {
@@ -78,7 +79,7 @@
       return rc;
     }
 
-    public async Task<List<ImageItem>> GetAllTopics()
+    public async Task<List<ImageItem>> GetAllTopics(IStringLocalizer L)
     {
       List<ImageItem> rc = new List<ImageItem>();
       
@@ -88,7 +89,7 @@
         foreach (var topic in GetMainTopics().Result)
         {
           var files = GetSubTopics(topic);
-          var list = AnnotateWithDate(files, topic);
+          var list = AnnotateWithDate(files, topic, L);
           foreach (var item in list)
           {
             allTopics.Add(new Tuple<DateTime, string, string>(item.Item1, item.Item2, topic));
@@ -172,9 +173,9 @@
       // Try: exact culture -> language -> neutral
       var candidates = new[]
       {
-        $"{baseWithoutJson}.{ui.Name}.json",                  // M13.jpg.de-DE.json
+        $"{baseWithoutJson}.{ui.Name}.json",                     // M13.jpg.de-DE.json
         $"{baseWithoutJson}.{ui.TwoLetterISOLanguageName}.json", // M13.jpg.de.json
-        $"{baseWithoutJson}.json"                          // M13.jpg.json
+        $"{baseWithoutJson}.json"                                // M13.jpg.json
       };
 
       foreach (var candidate in candidates)
@@ -207,7 +208,7 @@
 
     public string Unwrap(string input)
     {
-      // https://de.wikipedia.org/wiki/Deneb
+      // <a href="https://www.abenteuer-sterne.de" target="_blank">Abenteuer-Sterne</a>      
       string pattern1 = @"###(.*?)###(.*?)###";
 
       if (Regex.IsMatch(input, pattern1))
@@ -218,9 +219,7 @@
         return result1;
       }
 
-      // ##https://www.abenteuer-sterne.de##
-      // <a href="https://www.abenteuer-sterne.de" target="_blank">Abenteuer-Sterne</a>
-
+      // https://de.wikipedia.org/wiki/Deneb
       string pattern2 = @"##(.*?)##";
       string replacement2 = "<a target='_blank' href=https://$1><span style='color:azure; font-weight:bold; text-decoration: none;'>$1</span></a>";
 

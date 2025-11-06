@@ -1,8 +1,10 @@
 ﻿@using Focus2Infinity.Data
+@using Focus2Infinity
 @inject F2IDataService f2iDataService
+@inject IStringLocalizer<SharedResource> L
 
 <div class="text-center" style="margin: 50px 10px;">
-  <h3>@Topic</h3>
+  <h3>@L[Topic]</h3>
 </div>
 
 @if (images == null)
@@ -27,6 +29,6 @@ else
 
   protected override async Task OnInitializedAsync()
   {
-    images = await f2iDataService.GetSubTopicsSorted(Topic);
+    images = await f2iDataService.GetSubTopicsSorted(Topic, L);
   }
 }
