@@ -65,7 +65,7 @@ namespace TranslationManager
             new Dictionary<string, string> {
               { "en", "###Vega###en.wikipedia.org/wiki/Vega###" },
               { "nl", "###Wega###nl.wikipedia.org/wiki/Wega###" },
-              { "fr", "###V%C3%A9ga###fr.wikipedia.org/wiki/V%C3%A9ga###" }
+              { "fr", "###Véga###fr.wikipedia.org/wiki/Véga###" }
             }),
           new LinkInfo(
             "###Planit Pro###www.planitphoto.com###",
@@ -90,7 +90,16 @@ namespace TranslationManager
             "###h und ? (chi) Persei###www.spektrum.de/alias/wunder-des-weltalls/h-und-chi-persei/1430186###",
             new Dictionary<string, string> {
               { "*", "###h und ? (chi) Persei###www.spektrum.de/alias/wunder-des-weltalls/h-und-chi-persei/1430186###" }
-            })
+            }),
+          new LinkInfo(
+            "###Herz- und Seele Nebel###de.wikipedia.org/wiki/Herznebel###",
+            new Dictionary<string, string>
+            {
+              { "en", "###Heart and Soul Nebula###en.wikipedia.org/wiki/Heart_Nebula###" },
+              { "fr", "###Nébuleuse du Cœur###fr.wikipedia.org/wiki/IC_1805###"},
+              { "nl", "###Hart- and Zielnevel###nl.wikipedia.org/wiki/Hartnevel###" }
+            }
+            )
       };
 
     public static bool MatchesPattern(string inputTxt)
@@ -109,37 +118,45 @@ namespace TranslationManager
       return _linksPerLanguage.Any(x => value.Contains (x.OriginalLink));
     }
 
-    internal static string? ReplaceLinkWithToken(ref string value)
+    internal static List<string> ReplaceLinkWithToken(ref string value)
     {
+      var tokens = new List<string>();
       string val = value;
       var idx = _linksPerLanguage.FindIndex(x => val.Contains(x.OriginalLink));
-      if (idx >= 0)
+      while (idx >= 0)
       {
         var li = _linksPerLanguage[idx];
         var token = $"##{idx}##";
-        value = value.Replace (li.OriginalLink, token);
-        return token;
+        val = val.Replace (li.OriginalLink, token);
+        tokens.Add(token);
+        idx = _linksPerLanguage.FindIndex(x => val.Contains(x.OriginalLink));
       }
-      return null;
+      value = val;
+      return tokens;
     }
 
-    internal static string RestoreTranslatedLinkFromToken(string? translatedValue, string tokenForLink, string language)
+    internal static string RestoreTranslatedLinkFromToken(string? translatedValue, List<string> tokensForLink, string language)
     {
       if (translatedValue == null)
         return string.Empty;
 
-      int idx = Convert.ToInt16(tokenForLink.Replace("##", ""));
-      if (idx >= 0 && idx <= _linksPerLanguage.Count)
+      while (tokensForLink.Any())
       {
-        var li = _linksPerLanguage[idx];
-        if (li.LinksPerLanguage.ContainsKey(language))
+        var token = tokensForLink[0];
+        int idx = Convert.ToInt16(token.Replace("##", ""));
+        if (idx >= 0 && idx <= _linksPerLanguage.Count)
         {
-          return translatedValue.Replace(tokenForLink, li.LinksPerLanguage[language]);
+          var li = _linksPerLanguage[idx];
+          if (li.LinksPerLanguage.ContainsKey(language))
+          {
+            translatedValue = translatedValue.Replace(token, li.LinksPerLanguage[language]);
+          }
+          else if (li.LinksPerLanguage.ContainsKey("*"))
+          {
+            translatedValue = translatedValue.Replace(token, li.LinksPerLanguage["*"]);
+          }
         }
-        else if (li.LinksPerLanguage.ContainsKey("*"))
-        {
-          return translatedValue.Replace(tokenForLink, li.LinksPerLanguage["*"]);
-        }
+        tokensForLink.RemoveAt(0);
       }
 
       return translatedValue;
