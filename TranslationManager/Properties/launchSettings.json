@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "TranslationManager": {
+      "commandName": "Project",
+      "commandLineArgs": "..\\..\\..\\..\\key"
+    }
+  }
+}
