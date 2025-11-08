@@ -37,9 +37,9 @@ namespace TranslationManager
       _allTerms["fr"] = new Dictionary<string, string>(StringComparer.Ordinal);
       _allTerms["nl"] = new Dictionary<string, string>(StringComparer.Ordinal);
 
-      _allTerms["fr"].Add ("Ort", "Lieu");
-      _allTerms["fr"].Add ("Kamera", "Caméra");
-      _allTerms["fr"].Add ("Optik", "Optique");
+      _allTerms["fr"].Add("Ort", "Lieu");
+      _allTerms["fr"].Add("Kamera", "Caméra");
+      _allTerms["fr"].Add("Optik", "Optique");
       _allTerms["fr"].Add("Herz- und Seele Nebel", "Nébuleuse du Cœur et de l'Âme");
 
       _allTerms["nl"].Add("Ort", "Locatie");
@@ -48,6 +48,9 @@ namespace TranslationManager
 
       _allTerms["en"].Add("Ort", "Location");
       _allTerms["en"].Add("Herz- und Seele Nebel", "Heart- and Soul nebula");
+      _allTerms["en"].Add("Sturnvogel", "Witch's Broom");
+      _allTerms["en"].Add("Erdbeermond", "Strawberry Moon");
+      _allTerms["en"].Add("Feuerrad Galaxie", "Pinwheel Galaxy");
     } 
 
     public static void ShowTranslatePage()
@@ -64,7 +67,7 @@ namespace TranslationManager
            new MenuItem("f", "FR", () => TranslateAll("fr")),
            new MenuItem("n", "NL", () => TranslateAll("nl")),
            new MenuItem("a", "ALL", () => TranslateAll("")),
-           new MenuItem("EsC", "Cancel", () => { loop = false; })
+           new MenuItem("Esc", "Cancel", () => { loop = false; })
          );
 
       } while (loop);

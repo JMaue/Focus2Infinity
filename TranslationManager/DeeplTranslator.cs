@@ -59,7 +59,7 @@ namespace TranslationManager
       var translated = model?.Translations?.FirstOrDefault()?.Text;
       Console.WriteLine($"{text} : {translated}");
 
-      Thread.Sleep (500); // To avoid hitting rate limits
+      Thread.Sleep (1000); // To avoid hitting rate limits
       return translated ?? text;
     }
 

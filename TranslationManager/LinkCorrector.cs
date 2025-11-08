@@ -26,7 +26,7 @@ namespace TranslationManager
           new LinkInfo(
             "##de.wikipedia.org/wiki/Arecibo-Botschaft##",
             new Dictionary<string, string> {
-              { "en", "##en.wikipedia.org/wiki/Arecibo message##" },
+              { "en", "##en.wikipedia.org/wiki/Arecibo_message##" },
               { "nl", "##nl.wikipedia.org/wiki/Areciboboodschap##" },
               { "fr", "##fr.wikipedia.org/wiki/Message_d%27Arecibo##"} }
           ),

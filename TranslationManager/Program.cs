@@ -32,7 +32,7 @@ namespace TranslationManager
             new MenuItem("1", "ListAll", () => FileHelper.ListAll()),
             new MenuItem("2", "Translate", () => TranslationHelper.ShowTranslatePage() ),
             new MenuItem("3", "Delete", () => FileHelper.ShowDeletePage()),
-            new MenuItem("EsC", "Cancel", () => { loop = false; })
+            new MenuItem("Esc", "Cancel", () => { loop = false; })
           );
         }
         catch { }

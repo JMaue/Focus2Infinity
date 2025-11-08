@@ -20,36 +20,37 @@ namespace TranslationManager
         Environment.Exit(1);
       }
 
-      var allFiles = Directory.EnumerateFiles(root, "*.json", SearchOption.AllDirectories).ToList();
-      allFiles.RemoveAll(fn => isTranslatedFile(fn));
-      var processedDirectories = new HashSet<string>();
-      var missingTranslations = new List<string>();
-      foreach (var origFile in allFiles)
-      {
-        var folder = Path.GetDirectoryName(origFile);
-        var file = Path.GetFileName(origFile);
-        if (!processedDirectories.Contains(folder))
-        {
-          Console.WriteLine();
-          Console.WriteLine($"Directory: {folder}");
-          processedDirectories.Add(folder);
-        }
-        Console.WriteLine($"\t{file}");
-
-        // list the translated files:
-        foreach (var lang in _supportedLanguages)
-        {
-          var translatedFile = Path.Combine(folder, Path.GetFileNameWithoutExtension(file) + $".{lang}.json");
-          if (File.Exists(translatedFile))
-            Console.WriteLine($"\t\t{Path.GetFileName(translatedFile)}");
-          else
-            missingTranslations.Add(translatedFile);
-        }
-      }
-      Console.WriteLine();
       bool loop = true;    //stay in this submenu after an action is done
       do
       {
+        var allFiles = Directory.EnumerateFiles(root, "*.json", SearchOption.AllDirectories).ToList();
+        allFiles.RemoveAll(fn => isTranslatedFile(fn));
+        var processedDirectories = new HashSet<string>();
+        var missingTranslations = new List<string>();
+        foreach (var origFile in allFiles)
+        {
+          var folder = Path.GetDirectoryName(origFile);
+          var file = Path.GetFileName(origFile);
+          if (!processedDirectories.Contains(folder))
+          {
+            Console.WriteLine();
+            Console.WriteLine($"Directory: {folder}");
+            processedDirectories.Add(folder);
+          }
+          Console.WriteLine($"\t{file}");
+
+          // list the translated files:
+          foreach (var lang in _supportedLanguages)
+          {
+            var translatedFile = Path.Combine(folder, Path.GetFileNameWithoutExtension(file) + $".{lang}.json");
+            if (File.Exists(translatedFile))
+              Console.WriteLine($"\t\t{Path.GetFileName(translatedFile)}");
+            else
+              missingTranslations.Add(translatedFile);
+          }
+        }
+        Console.WriteLine();
+
         CliTools.WriteTitle("Missing Translations");
 
         var menuItems = new List<MenuItem>();
@@ -58,7 +59,8 @@ namespace TranslationManager
         {
           menuItems.Add(new MenuItem($"{idx++}", missingFile, () => TranslationHelper.TranslateFile (missingFile, true) ));
         }
-        menuItems.Add(new MenuItem("EsC", "Cancel", () => { loop = false; }));
+        menuItems.Add(new MenuItem("0", "All", () => missingTranslations.ForEach(f => TranslationHelper.TranslateFile(f, true))));
+        menuItems.Add(new MenuItem("Esc", "Cancel", () => { loop = false; }));
         var selectedItem = CliTools.ShowMenu("Translate", 1,menuItems.ToArray());
 
       } while (loop);
@@ -88,7 +90,7 @@ namespace TranslationManager
            new MenuItem("e", "EN", () => FileHelper.DeleteAll("en")),
            new MenuItem("f", "FR", () => FileHelper.DeleteAll("fr")),
            new MenuItem("n", "NL", () => FileHelper.DeleteAll("nl")),
-           new MenuItem("EsC", "Cancel", () => { loop = false; })
+           new MenuItem("Esc", "Cancel", () => { loop = false; })
          );
 
       } while (loop);
