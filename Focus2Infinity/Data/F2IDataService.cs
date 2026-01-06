@@ -4,6 +4,7 @@
   using System.Collections.Generic;
   using System.Drawing;
   using System.Globalization;
+  using System.Text.Json;
   using System.Text.RegularExpressions;
 
   public class F2IDataService
@@ -52,7 +53,7 @@
         var src = GetStoryText(mainTopic, f.Name).Result;
         if (src != null)
         {
-          list.Add(new Tuple<DateTime, string>(src.GetDateTaken (L), f.Name));
+          list.Add(new Tuple<DateTime, string>(src.GetDateTaken(L), f.Name));
         }
         else
         {
@@ -82,7 +83,7 @@
     public async Task<List<ImageItem>> GetAllTopics(IStringLocalizer L)
     {
       List<ImageItem> rc = new List<ImageItem>();
-      
+
       await Task.Run(() =>
       {
         var allTopics = new List<Tuple<DateTime, string, string>>();
@@ -98,7 +99,7 @@
 
         foreach (var kvp in allTopics.OrderByDescending(kvp => kvp.Item1))
         {
-          rc.Add(new ImageItem (kvp.Item2, kvp.Item3));
+          rc.Add(new ImageItem(kvp.Item2, kvp.Item3));
         }
       });
 
@@ -115,10 +116,10 @@
         rc = DoGetStoryText(topic, src, ui);
       });
 
-      return rc ?? new ImageStory ("{}");
+      return rc ?? new ImageStory("{}");
     }
 
-    public async Task<(int width, int height)> GetImageFormat (string topic, string src)
+    public async Task<(int width, int height)> GetImageFormat(string topic, string src)
     {
       int width = 0;
       int height = 0;
@@ -159,7 +160,7 @@
         string jsonString = File.ReadAllText(htmlFilePath);
 
         // Deserialisieren in eine Liste von Dictionary-Einträgen
-        return new ImageStory (jsonString);
+        return new ImageStory(jsonString);
       }
 
       return null;
@@ -188,7 +189,7 @@
     }
 
     public async Task<bool> OverlayExists(string topic, string src)
-    { 
+    {
       bool rc = false;
       await Task.Run(() =>
       {
@@ -226,6 +227,39 @@
       string result2 = Regex.Replace(input, pattern2, replacement2);
       return result2;
 
+    }
+
+    public async Task<List<CommentItem>> GetCommentHistory(string topic, string src)
+    {
+      var rc = new List<CommentItem>();
+      var root = _hostingEnvironment.WebRootPath;
+      string commentsFilePath = $"{Path.Combine(root, "img", topic, $"{src}.comments.json")}";
+      if (File.Exists(commentsFilePath))
+      {
+        await Task.Run(() =>
+        {
+          var jsonString = File.ReadAllText(commentsFilePath);
+          rc = JsonSerializer.Deserialize<List<CommentItem>>(jsonString) ?? new List<CommentItem>();
+        });
+      }
+      return rc;
+    }
+
+    public async Task AddComment(string topic, string src, CommentItem comment, bool isValid)
+    {
+      var root = _hostingEnvironment.WebRootPath;
+      string commentsFilePath = isValid ?
+          $"{Path.Combine(root, "img", topic, $"{src}.comments.json")}" :
+          $"{Path.Combine(root, "img", topic, $"{src}.denied.json")}";
+      var comments = new List<CommentItem>();
+      if (File.Exists(commentsFilePath))
+      {
+        var jsonString = await File.ReadAllTextAsync(commentsFilePath);
+        comments = JsonSerializer.Deserialize<List<CommentItem>>(jsonString) ?? new List<CommentItem>();
+      }
+      comments.Add(comment);
+      var updatedJson = JsonSerializer.Serialize(comments, new JsonSerializerOptions { WriteIndented = true });
+      await File.WriteAllTextAsync(commentsFilePath, updatedJson);
     }
   }
 }

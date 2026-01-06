@@ -12,10 +12,9 @@
 else
 {
   <div class="row">
-    <h5>@Headline</h5>
     @foreach (var item in Content)
     {
-      <div class="row">
+      <div class="row mt-2">
         <div class="col-12 col-md-3 justify-content-end">
           <h7 style="font-weight:bold;">@item.Key:</h7>
         </div>
@@ -25,6 +24,11 @@ else
           </h7>
         </div>
       </div>
+    }
+
+    @if (Details)
+    {
+      <Cmp_Commentator Topic="@Topic" Src="@Src" />
     }
   </div>
 }

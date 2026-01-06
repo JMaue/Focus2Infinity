@@ -1,0 +1,132 @@
+﻿@using Focus2Infinity.Data
+@using Focus2Infinity.Services
+
+@inject IStringLocalizer<SharedResource> L
+@inject F2IDataService f2iDataService
+@inject IEMailService f2iEmailService
+@inject ICommentValidationService f2iCommentValidationService
+
+<div class="mt-3">
+  <button class="btn btn-outline-secondary btn-sm" @onclick="ToggleConversation" aria-expanded="@showConversation">
+    @L["Conversation"] <span class="ms-1" aria-hidden="true">@((showConversation ? "▴" : "▾"))</span>
+  </button>
+</div>
+
+@if (showConversation)
+{
+  <div class="card mt-3 border bg-body text-body">
+@*     <div class="card-header bg-secondary">@L["Conversation"]</div> *@
+    <div class="card-body">
+      @if (comments.Count == 0)
+      {
+        <div class="text-muted">@L["No comments yet."]</div>
+      }
+      else
+      {
+        @foreach (var c in comments)
+        {
+          var name = c.Name;
+          var date = c.Date.ToString("g");
+          var txt = c.Text;
+          <div class="mb-3 pb-2 border-bottom">
+            <div>
+              <strong class="text-white">@name</strong> 
+              <small class="text-muted">@date</small>
+            </div>
+            <div class="mt-1 text-light">@txt</div>
+          </div>
+        }
+      }
+
+      <hr />
+      <EditForm Model="commentModel" OnValidSubmit="HandleSubmit">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+        <div class="row g-2">
+          <div class="col-md-4">
+            <InputText class="form-control" @bind-Value="commentModel.Name" placeholder="@L["Name"]" />
+          </div>
+          <div class="col-md-4">
+            <InputText type="email" class="form-control" @bind-Value="commentModel.Email" placeholder="@L["EMail"]" />
+          </div>
+          <div class="col-12">
+            <InputTextArea class="form-control" @bind-Value="commentModel.Text" placeholder="@L["Comment"]" rows="3" />
+          </div>
+          <div class="col-12 d-flex justify-content-end">
+            <button type="submit" class="btn btn-primary" disabled="@submitting">@L["Submit"]</button>
+          </div>
+        </div>
+      </EditForm>
+    </div>
+  </div>
+}
+
+@code {
+
+  [Parameter]
+  public string Topic { get; set; }
+
+  [Parameter]
+  public string Src { get; set; }
+
+  private bool showConversation = false;
+  private bool submitting = false;
+  private List<CommentItem> comments = new();
+
+  private CommentModel commentModel = new();
+
+  protected override async Task OnInitializedAsync()
+  {
+    comments = await f2iDataService.GetCommentHistory(Topic, Src);
+  }
+
+  private void ToggleConversation()
+  {
+    showConversation = !showConversation;
+  }
+
+  private async Task HandleSubmit()
+  {
+    if (string.IsNullOrWhiteSpace(commentModel.Name) || string.IsNullOrWhiteSpace(commentModel.Email) || string.IsNullOrWhiteSpace(commentModel.Text))
+      return;
+
+    try
+    {
+      (bool isValid, string reason) = await f2iCommentValidationService.IsValidComment(commentModel.Text);
+
+      var about = isValid ? $"New comment on {Topic}/{Src}" : $"Invalid comment on {Topic}/{Src}";
+      var content = $"Name: {commentModel.Name}\n\nEmail: {commentModel.Email}\n\nMessage: {commentModel.Text}\n\nReason: {reason}";
+      submitting = true;
+      var commentItem = new CommentItem
+      {
+        Name = commentModel.Name,
+        Email = commentModel.Email,
+        Text = commentModel.Text,
+        Date = DateTime.UtcNow,
+        Reason = reason
+      };
+      if (isValid)
+        comments.Add(commentItem);
+
+      // send email notification
+      await f2iEmailService.SendAsync("j.mauersberger@focustoinfinity.eu", about, content);
+
+      // store comment
+      await f2iDataService.AddComment(Topic, Src, commentItem, isValid);
+
+      // start fresh
+      commentModel = new CommentModel();
+    }
+    finally
+    {
+      submitting = false;
+    }
+  }
+
+  private sealed class CommentModel
+  {
+    public string Name { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
+    public string Text { get; set; } = string.Empty;
+  }
+}

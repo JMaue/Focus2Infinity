@@ -40,5 +40,7 @@ else
   protected override async Task OnInitializedAsync()
   {
     images = await f2iDataService.GetAllTopics(L);
+
+    await base.OnInitializedAsync();
   }
 }

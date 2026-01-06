@@ -56,9 +56,7 @@
       var c1 = Thread.CurrentThread.CurrentCulture;
       var c2 = Thread.CurrentThread.CurrentUICulture;
       allTopics ??= new Dictionary<string, string>();
-      var ls = L.GetString(topic);
-
-      allTopics[topic] = ls; // ls.ResourceNotFound ? topic : ls.Value;
+      allTopics[topic] = L.GetString(topic);
     }
   }
 }
