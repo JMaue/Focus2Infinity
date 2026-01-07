@@ -1,5 +1,6 @@
 ﻿using Anthropic.SDK;
 using Microsoft.Extensions.AI;
+using Microsoft.Extensions.Logging;
 
 namespace Focus2Infinity.Services
 {
@@ -12,6 +13,7 @@ namespace Focus2Infinity.Services
   {
     private readonly IChatClient _anthropicClient;
     private readonly ChatOptions _chatOptions;
+    private readonly ILogger<CommentValidationService> _logger;
 
     private const string ModerationPrompt = @"You are a content‑moderation system for a public astronomy website. 
 Your task is to evaluate a user-submitted comment and decide whether it is appropriate for display.
@@ -34,18 +36,27 @@ A comment is APPROPRIATE if it:
 - Contains harmless jokes or casual language
 
 Your output must be a JSON object with the following fields:
-
 {{
   ""appropriate"": true/false,
   ""reason"": ""Short explanation of why the comment is or is not appropriate.""
 }}
-
+The short explanation of the reason must be in the same language as the user-submitted comment
 Now evaluate the following user comment: ";
 
-    public CommentValidationService(string key)
+    public CommentValidationService(string apiKey, ILogger<CommentValidationService> logger)
     {
+      _logger = logger;
+      _logger.LogInformation("Initializing CommentValidationService");
+
+      // Create HttpClient with custom timeout
+      var httpClient = new HttpClient
+      {
+        Timeout = TimeSpan.FromSeconds(120) // Set timeout to 120 seconds (default is 100 seconds)
+      };
+
       _anthropicClient = new AnthropicClient(
-        new APIAuthentication(key))
+        new APIAuthentication(apiKey),
+        httpClient)
         .Messages
         .AsBuilder()
         .Build();
@@ -59,22 +70,40 @@ Now evaluate the following user comment: ";
 
     public async Task<(bool, string)> IsValidComment(string comment)
     {
+      _logger.LogInformation("Validating comment with length: {Length}", comment?.Length ?? 0);
+      
       // Check if the comment is null or empty
       if (string.IsNullOrWhiteSpace(comment))
-        return (false, "Comment is required.");
+      {
+        _logger.LogWarning("Comment validation failed: empty comment");
+        return (false, "Comment is empty");
+      }
 
       // Check for length constraints (e.g., max 500 characters)
       if (comment.Length > 500)
-        return (false, "Comment is too long.");
-
-      var msg = AssembleChatMessage(comment);
-      string responseContent = string.Empty;
-      await foreach (var message in _anthropicClient.GetStreamingResponseAsync(msg, _chatOptions))
       {
-        responseContent += message.Text;
+        _logger.LogWarning("Comment validation failed: length {Length} exceeds limit", comment.Length);
+        return (false, "Comment too long");
       }
 
-      return ParseModerationResponse(responseContent);
+      try
+      {
+        var msg = AssembleChatMessage(comment);
+        string responseContent = string.Empty;
+        
+        await foreach (var message in _anthropicClient.GetStreamingResponseAsync(msg, _chatOptions))
+        {
+          _logger.LogWarning("received from Anthropic API: {Length}", message.Text.Length);
+          responseContent += message.Text;
+        }
+
+        return ParseModerationResponse(responseContent);
+      }
+      catch (Exception ex)
+      {
+        _logger.LogError(ex, "Error validating comment");
+        return (false, "Validation error occurred");
+      }
     }
 
     private (bool, string) ParseModerationResponse(string responseContent)
@@ -121,6 +150,7 @@ Now evaluate the following user comment: ";
         reason = $"JSON parsing failed: {ex.Message}";
       }
 
+      _logger.LogInformation("Comment moderation result: appropriate={IsAppropriate}, reason={Reason}", isAppropriate, reason);
       return (isAppropriate, reason);
     }
 

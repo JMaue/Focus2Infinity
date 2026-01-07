@@ -48,7 +48,7 @@
             <InputText class="form-control" @bind-Value="commentModel.Name" placeholder="@L["Name"]" />
           </div>
           <div class="col-md-4">
-            <InputText type="email" class="form-control" @bind-Value="commentModel.Email" placeholder="@L["EMail"]" />
+            <InputText type="email" class="form-control" @bind-Value="commentModel.Email" placeholder="@L["E-mail"]" />
           </div>
           <div class="col-12">
             <InputTextArea class="form-control" @bind-Value="commentModel.Text" placeholder="@L["Comment"]" rows="3" />
@@ -88,7 +88,7 @@
   private List<CommentItem> comments = new();
 
   private CommentModel commentModel = new();
-  
+
   private string toastTitle = "";
   private string toastMessage = "";
   private string toastClass = "";
@@ -111,7 +111,8 @@
     try
     {
       submitting = true;
-      
+
+      //(bool isValid, string reason) = (false, "Test"); ; //await f2iCommentValidationService.IsValidComment(commentModel.Text);
       (bool isValid, string reason) = await f2iCommentValidationService.IsValidComment(commentModel.Text);
 
       var about = isValid ? $"New comment on {Topic}/{Src}" : $"Invalid comment on {Topic}/{Src}";
@@ -149,7 +150,7 @@
       }
       else
       {
-        toastTitle = L["Comment Rejected"];
+        toastTitle = L["Rejected"];
         toastMessage = $"{L["Your comment has been rejected."]} {reason}";
         toastClass = "bg-danger text-white";
       }

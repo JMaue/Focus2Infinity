@@ -165,4 +165,31 @@
   <data name="Datum" xml:space="preserve">
     <value>Datum</value>
   </data>
+  <data name="Conversation" xml:space="preserve">
+    <value>Conversatie</value>
+  </data>
+  <data name="Submit" xml:space="preserve">
+    <value>Verzenden</value>
+  </data>
+  <data name="Name" xml:space="preserve">
+    <value>Naam</value>
+  </data>
+  <data name="Comment" xml:space="preserve">
+    <value>Commentaar</value>
+  </data>
+  <data name="Success" xml:space="preserve">
+    <value>Succes</value>
+  </data>
+  <data name="Your comment has been submitted successfully." xml:space="preserve">
+    <value>Uw opmerking is succesvol verzonden.</value>
+  </data>
+  <data name="Rejected" xml:space="preserve">
+    <value>Afgewezen</value>
+  </data>
+  <data name="Your comment has been rejected." xml:space="preserve">
+    <value>Uw opmerking is afgewezen.</value>
+  </data>
+  <data name="No comments yet." xml:space="preserve">
+    <value>Er zijn nog geen reacties.</value>
+  </data>
 </root>

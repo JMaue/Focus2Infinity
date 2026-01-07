@@ -10,6 +10,7 @@
     <PackageReference Include="Anthropic.SDK" Version="5.8.0" />
     <PackageReference Include="Microsoft.Extensions.AI" Version="10.1.1" />
     <PackageReference Include="Microsoft.Extensions.Localization" Version="10.0.0-rc.2.25502.107" />
+    <PackageReference Include="Serilog.AspNetCore" Version="10.0.0" />
     <PackageReference Include="System.Drawing.Common" Version="8.0.10" />
   </ItemGroup>
 
