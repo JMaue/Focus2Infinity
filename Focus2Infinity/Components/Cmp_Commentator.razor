@@ -1,5 +1,6 @@
 ﻿@using Focus2Infinity.Data
 @using Focus2Infinity.Services
+@inject IJSRuntime JSRuntime
 
 @inject IStringLocalizer<SharedResource> L
 @inject F2IDataService f2iDataService
@@ -53,13 +54,26 @@
             <InputTextArea class="form-control" @bind-Value="commentModel.Text" placeholder="@L["Comment"]" rows="3" />
           </div>
           <div class="col-12 d-flex justify-content-end">
-            <button type="submit" class="btn btn-primary" disabled="@submitting">@L["Submit"]</button>
+            <button type="submit" class="btn" style="background-color:lightsteelblue; color:black" disabled="@submitting">@L["Submit"]</button>
           </div>
         </div>
       </EditForm>
     </div>
   </div>
 }
+
+<!-- Toast Container -->
+<div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 9999;">
+  <div id="commentToast" class="toast align-items-center border-0 @toastClass" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="d-flex">
+      <div class="toast-body">
+        <strong>@toastTitle</strong><br />
+        @toastMessage
+      </div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+  </div>
+</div>
 
 @code {
 
@@ -74,6 +88,10 @@
   private List<CommentItem> comments = new();
 
   private CommentModel commentModel = new();
+  
+  private string toastTitle = "";
+  private string toastMessage = "";
+  private string toastClass = "";
 
   protected override async Task OnInitializedAsync()
   {
@@ -92,11 +110,13 @@
 
     try
     {
+      submitting = true;
+      
       (bool isValid, string reason) = await f2iCommentValidationService.IsValidComment(commentModel.Text);
 
       var about = isValid ? $"New comment on {Topic}/{Src}" : $"Invalid comment on {Topic}/{Src}";
       var content = $"Name: {commentModel.Name}\n\nEmail: {commentModel.Email}\n\nMessage: {commentModel.Text}\n\nReason: {reason}";
-      submitting = true;
+      
       var commentItem = new CommentItem
       {
         Name = commentModel.Name,
@@ -105,8 +125,11 @@
         Date = DateTime.UtcNow,
         Reason = reason
       };
+      
       if (isValid)
+      {
         comments.Add(commentItem);
+      }
 
       // send email notification
       await f2iEmailService.SendAsync("j.mauersberger@focustoinfinity.eu", about, content);
@@ -116,11 +139,54 @@
 
       // start fresh
       commentModel = new CommentModel();
+
+      // Show toast notification
+      if (isValid)
+      {
+        toastTitle = L["Success"];
+        toastMessage = L["Your comment has been submitted successfully."];
+        toastClass = "bg-success text-white";
+      }
+      else
+      {
+        toastTitle = L["Comment Rejected"];
+        toastMessage = $"{L["Your comment has been rejected."]} {reason}";
+        toastClass = "bg-danger text-white";
+      }
+      
+      // Force UI update before showing toast
+      StateHasChanged();
+      await Task.Delay(100);
+      
+      await ShowToast();
     }
     finally
     {
       submitting = false;
     }
+  }
+
+  private async Task ShowToast()
+  {
+    await JSRuntime.InvokeVoidAsync("eval", @"
+      (function() {
+        var toastEl = document.getElementById('commentToast');
+        if (toastEl && typeof bootstrap !== 'undefined') {
+          var toast = new bootstrap.Toast(toastEl, { 
+            autohide: true, 
+            delay: 5000 
+          });
+          toast.show();
+        } else {
+          if (toastEl) {
+             console.error('Toast element found');
+          }
+          else {
+            console.error('Bootstrap not found');
+          }
+        }
+      })();
+    ");
   }
 
   private sealed class CommentModel
