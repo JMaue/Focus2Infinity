@@ -43,7 +43,7 @@ Your output must be a JSON object with the following fields:
 The short explanation of the reason must be in the same language as the user-submitted comment
 Now evaluate the following user comment: ";
 
-    public CommentValidationService(string apiKey, ILogger<CommentValidationService> logger)
+    public CommentValidationService(string apiKey, string proxy, ILogger<CommentValidationService> logger)
     {
       _logger = logger;
       _logger.LogInformation("Initializing CommentValidationService");
@@ -51,9 +51,18 @@ Now evaluate the following user comment: ";
       // Create HttpClient with custom timeout
       var httpClient = new HttpClient
       {
-        Timeout = TimeSpan.FromSeconds(120) // Set timeout to 120 seconds (default is 100 seconds)
+        Timeout = TimeSpan.FromSeconds(120), // Set timeout to 120 seconds (default is 100 seconds)
       };
+      if (!string.IsNullOrEmpty(proxy) && proxy.Contains(":"))
+      {
+        var parts = proxy.Split(':');
+        var url = $"http://{parts[0]}";
+        var port = int.Parse(parts[1]);
 
+        // IONOS-Proxyserver und Standardport global setzen
+        HttpClient.DefaultProxy = new System.Net.WebProxy(url, port);
+
+      }
       _anthropicClient = new AnthropicClient(
         new APIAuthentication(apiKey),
         httpClient)

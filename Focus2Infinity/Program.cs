@@ -40,7 +40,7 @@ try
     builder.Services.AddSingleton<ICommentValidationService>(sp =>
     {
       var logger = sp.GetRequiredService<ILogger<CommentValidationService>>();
-      return new CommentValidationService(settings[0], logger);
+      return new CommentValidationService(settings[0], settings[5], logger);
     });
     builder.Services.AddSingleton<IEMailService, EMailService>(sp => new EMailService(settings[1], settings[2], settings[3], settings[4]));
 
