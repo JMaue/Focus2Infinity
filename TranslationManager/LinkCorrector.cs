@@ -61,6 +61,13 @@ namespace TranslationManager
               { "fr", "###Altaïr###fr.wikipedia.org/wiki/Altaïr###" }
             }),
           new LinkInfo(
+            "###Sternentstehungsgebiet###de.wikipedia.org/wiki/Orionnebel###",
+            new Dictionary<string, string> {
+              { "en", "###Star forming region###en.wikipedia.org/wiki/Orion_Nebula###" },
+              { "nl", "###Sterrenvormingsgebied###nl.wikipedia.org/wiki/Orionnevel###" },
+              { "fr", "###région de formation stellaire###fr.wikipedia.org/wiki/N%C3%A9buleuse_d%27Orion###" }
+            }),
+          new LinkInfo(
             "###Wega###de.wikipedia.org/wiki/Wega###",
             new Dictionary<string, string> {
               { "en", "###Vega###en.wikipedia.org/wiki/Vega###" },

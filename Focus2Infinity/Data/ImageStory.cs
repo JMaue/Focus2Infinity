@@ -57,7 +57,7 @@ namespace Focus2Infinity.Data
 
         foreach (var key in _metaDescription.Keys)
         {
-          if (key == "Headline" || key == C_Details)
+          if (key == C_Details)
             continue;
 
           yield return new KeyValuePair<string, string>(key, _metaDescription[key]);
@@ -72,7 +72,7 @@ namespace Focus2Infinity.Data
         if (_metaDescription == null)
           yield break;
 
-        foreach (var c in Content)
+        foreach (var c in Content.Where(c=>c.Key != "Headline"))  // do not include headline when showing details
           yield return c;
 
         if (_metaDescription.ContainsKey(C_Details))

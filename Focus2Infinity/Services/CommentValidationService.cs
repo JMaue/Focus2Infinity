@@ -102,7 +102,6 @@ Now evaluate the following user comment: ";
         
         await foreach (var message in _anthropicClient.GetStreamingResponseAsync(msg, _chatOptions))
         {
-          _logger.LogWarning("received from Anthropic API: {Length}", message.Text.Length);
           responseContent += message.Text;
         }
 

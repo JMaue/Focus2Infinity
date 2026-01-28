@@ -30,8 +30,9 @@ namespace TranslationManager
 
           var selectedItem = CliTools.ShowMenu("TestMenu", 1,
             new MenuItem("1", "ListAll", () => FileHelper.ListAll()),
-            new MenuItem("2", "Translate", () => TranslationHelper.ShowTranslatePage() ),
-            new MenuItem("3", "Delete", () => FileHelper.ShowDeletePage()),
+            new MenuItem("2", "WithoutJsonData", () => FileHelper.ListAllWithoutJsonData()),
+            new MenuItem("3", "Translate", () => TranslationHelper.ShowTranslatePage()),
+            new MenuItem("4", "Delete", () => FileHelper.ShowDeletePage()),
             new MenuItem("Esc", "Cancel", () => { loop = false; })
           );
         }

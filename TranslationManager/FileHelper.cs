@@ -90,6 +90,7 @@ namespace TranslationManager
            new MenuItem("e", "EN", () => FileHelper.DeleteAll("en")),
            new MenuItem("f", "FR", () => FileHelper.DeleteAll("fr")),
            new MenuItem("n", "NL", () => FileHelper.DeleteAll("nl")),
+           new MenuItem("c", "Comments and Denied files", () => FileHelper.DeleteCommentFiles()),
            new MenuItem("Esc", "Cancel", () => { loop = false; })
          );
 
@@ -118,6 +119,23 @@ namespace TranslationManager
       }
     }
 
+    private static void DeleteCommentFiles()
+    {
+      var rootPath = FindImgRoot();
+      if (rootPath == null)
+      {
+        Console.Error.WriteLine("wwwroot\\img not found.");
+        return;
+      }
+      var allFiles = Directory.EnumerateFiles(rootPath, $"*.comments.json", SearchOption.AllDirectories).ToList();
+      allFiles.AddRange(Directory.EnumerateFiles(rootPath, $"*.denied.json", SearchOption.AllDirectories));
+      foreach (var origFile in allFiles)
+      {
+        File.Delete(origFile);
+        Console.WriteLine($"Deleted: {origFile}");
+      }
+    }
+
     #region File Operations
     public static string? FindImgRoot()
     {
@@ -138,6 +156,67 @@ namespace TranslationManager
       }
 
       return null;
+    }
+
+    internal static void ListAllWithoutJsonData()
+    {
+      var root = FindImgRoot();
+      if (root is null)
+      {
+        Console.Error.WriteLine("wwwroot\\img not found. Pass its path as the first argument.");
+        Environment.Exit(1);
+      }
+
+      bool loop = true;    //stay in this submenu after an action is done
+      do
+      {
+        var allImageFiles = Directory.EnumerateFiles(root, "*.*", SearchOption.AllDirectories)
+                                     .Where(file => !file.EndsWith(".json", StringComparison.OrdinalIgnoreCase)).ToList();
+        var processedDirectories = new HashSet<string>();
+        var missingJsonFiles = new List<string>();
+        foreach (var origFile in allImageFiles)
+        {
+          var folder = Path.GetDirectoryName(origFile);
+          var file = Path.GetFileName(origFile);
+          if (file.StartsWith("tbn_", StringComparison.OrdinalIgnoreCase) ||
+              file.StartsWith("ovl_", StringComparison.OrdinalIgnoreCase))
+            continue;
+
+          var jsonFile = $"{origFile}.json";
+          if (!File.Exists(jsonFile))
+            missingJsonFiles.Add(jsonFile);
+          Console.WriteLine($"\t{file}");
+        }
+        Console.WriteLine();
+
+        CliTools.WriteTitle("Missing JSON Files");
+
+        var menuItems = new List<MenuItem>();
+        var idx = 1;
+        foreach (var missingFile in missingJsonFiles)
+        {
+          menuItems.Add(new MenuItem($"{idx++}", missingFile, () => CreateJsonFile(missingFile)));
+        }
+        //menuItems.Add(new MenuItem("0", "All", () => missingJsonFiles.ForEach(f => CreateJsonFile(f, true))));
+        menuItems.Add(new MenuItem("Esc", "Cancel", () => { loop = false; }));
+        var selectedItem = CliTools.ShowMenu("Translate", 1, menuItems.ToArray());
+
+      } while (loop);
+    }
+
+    private static void CreateJsonFile(string missingFile)
+    {
+      var jsonTemplate = @"{
+  ""Headline"": """",
+  ""Ort"": """",
+  ""Datum"": """",
+  ""Optik"": """",
+  ""Kamera"": """",
+  ""Exposure Settings"": """",
+  ""Kommentar"": """",
+  ""Details"": """"
+}";
+      File.WriteAllText(missingFile, jsonTemplate);
     }
 
     #endregion

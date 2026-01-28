@@ -42,15 +42,18 @@ namespace TranslationManager
       _allTerms["fr"].Add("Optik", "Optique");
       _allTerms["fr"].Add("Herz- und Seele Nebel", "Nébuleuse du Cœur et de l'Âme");
       _allTerms["fr"].Add("Am Schliffkopf", "au Schliffkopf");
+      _allTerms["fr"].Add("Sturmvogel", "Nébuleuse du Voile");
+      _allTerms["fr"].Add("Feuerrad Galaxie", "Galaxie du Moulinet");
 
       _allTerms["nl"].Add("Ort", "Locatie");
       _allTerms["nl"].Add("Exposure Settings", "Belichtings instellingen");
       _allTerms["nl"].Add("Herz- und Seele Nebel", "Hart- and Zielnevel");
       _allTerms["nl"].Add("Am Schliffkopf", "op de Schliffkopf");
+      _allTerms["nl"].Add("Feuerrad Galaxie", "Windmolenstelsel");
 
       _allTerms["en"].Add("Ort", "Location");
       _allTerms["en"].Add("Herz- und Seele Nebel", "Heart- and Soul nebula");
-      _allTerms["en"].Add("Sturnvogel", "Witch's Broom");
+      _allTerms["en"].Add("Sturmvogel", "Witch's Broom");
       _allTerms["en"].Add("Erdbeermond", "Strawberry Moon");
       _allTerms["en"].Add("Feuerrad Galaxie", "Pinwheel Galaxy");
       _allTerms["en"].Add("Am Schliffkopf", "At the Schliffkopf");
