@@ -1,0 +1,159 @@
+@inject IJSRuntime JSRuntime
+@inject IStringLocalizer<SharedResource> L
+@inject NavigationManager Navigation
+
+@rendermode InteractiveServer
+
+@if (showBanner)
+{
+  <div class="cookie-consent-banner position-fixed bottom-0 start-0 end-0 bg-dark text-white p-3 shadow-lg" style="z-index: 10000;">
+    <div class="container">
+      <div class="row align-items-center">
+        <div class="col-lg-8 mb-2 mb-lg-0">
+          <p class="mb-0">
+            <strong>@L["Cookie Consent"]</strong><br />
+            @L["CookieMsg"]
+@*             <a href="/privacy" class="text-white text-decoration-underline ms-2">@L["Privacy Policy"]</a> *@
+          </p>
+        </div>
+        <div class="col-lg-4 text-lg-end">
+          <button class="btn btn-success me-2" @onclick="AcceptCookies">@L["Accept"]</button>
+          <button class="btn btn-outline-light" @onclick="DeclineCookies">@L["Decline"]</button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+@code {
+  private bool showBanner = false;
+  private const string ConsentCookieName = "cookieConsent"; // Matches LanguageController expectation
+
+  protected override async Task OnAfterRenderAsync(bool firstRender)
+  {
+    if (firstRender)
+    {
+      var hasConsent = await CheckConsent();
+      if (!hasConsent)
+      {
+        showBanner = true;
+        StateHasChanged();
+      }
+    }
+  }
+
+  private async Task<bool> CheckConsent()
+  {
+    try
+    {
+      // First check sessionStorage (works for current session)
+      var sessionConsent = await GetSessionStorage("cookieConsent");
+      if (!string.IsNullOrEmpty(sessionConsent))
+      {
+        return true; // User already made a choice this session
+      }
+      
+      // Then check if cookie exists (persisted from previous session)
+      return await CheckConsentCookie();
+    }
+    catch
+    {
+      return false;
+    }
+  }
+
+  private async Task AcceptCookies()
+  {
+    // Set cookie for consent (persists across sessions)
+    await SetConsentCookie("accepted");
+    
+    // Also store in sessionStorage so we know consent was given this session
+    await SetSessionStorage("cookieConsent", "accepted");
+    
+    showBanner = false;
+    StateHasChanged();
+  }
+
+  private async Task DeclineCookies()
+  {
+    // DO NOT set any cookies! Only store in sessionStorage that user declined
+    await SetSessionStorage("cookieConsent", "declined");
+    
+    // Clear ALL existing cookies (including any language cookies)
+    await ClearAllCookies();
+    
+    showBanner = false;
+    StateHasChanged();
+  }
+
+  private async Task<bool> CheckConsentCookie()
+  {
+    try
+    {
+      var cookieValue = await JSRuntime.InvokeAsync<string>("eval", 
+        $"document.cookie.split('; ').find(row => row.startsWith('{ConsentCookieName}='))?.split('=')[1] || ''");
+      return !string.IsNullOrEmpty(cookieValue);
+    }
+    catch
+    {
+      return false;
+    }
+  }
+
+  private async Task SetConsentCookie(string value)
+  {
+    try
+    {
+      var isSecure = Navigation.Uri.StartsWith("https://");
+      var secureFlag = isSecure ? "; Secure" : "";
+      
+      await JSRuntime.InvokeVoidAsync("eval", 
+        $"document.cookie = '{ConsentCookieName}={value}; path=/; max-age=31536000; SameSite=Lax{secureFlag}'");
+    }
+    catch
+    {
+      // Ignore errors
+    }
+  }
+
+  private async Task ClearAllCookies()
+  {
+    try
+    {
+      await JSRuntime.InvokeVoidAsync("eval", @"
+        document.cookie.split(';').forEach(function(c) { 
+          var cookieName = c.trim().split('=')[0];
+          document.cookie = cookieName + '=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC; SameSite=Lax';
+        });
+      ");
+    }
+    catch
+    {
+      // Ignore errors
+    }
+  }
+
+  private async Task<string> GetSessionStorage(string key)
+  {
+    try
+    {
+      return await JSRuntime.InvokeAsync<string>("sessionStorage.getItem", key) ?? "";
+    }
+    catch
+    {
+      return "";
+    }
+  }
+
+  private async Task SetSessionStorage(string key, string value)
+  {
+    try
+    {
+      await JSRuntime.InvokeVoidAsync("sessionStorage.setItem", key, value);
+    }
+    catch
+    {
+      // Ignore errors
+    }
+  }
+}

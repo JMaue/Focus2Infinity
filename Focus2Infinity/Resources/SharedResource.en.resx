@@ -192,4 +192,16 @@
   <data name="No comments yet." xml:space="preserve">
     <value>No comments yet.</value>
   </data>
+  <data name="Accept" xml:space="preserve">
+    <value>Accept</value>
+  </data>
+  <data name="Decline" xml:space="preserve">
+    <value>Decline</value>
+  </data>
+  <data name="Cookie Consent" xml:space="preserve">
+    <value>Cookie Consent</value>
+  </data>
+  <data name="CookieMsg" xml:space="preserve">
+    <value>We use cookies to save your language settings. By clicking “Accept,” you agree to the use of cookies. Otherwise, the language displayed will be selected based on your browser settings.</value>
+  </data>
 </root>

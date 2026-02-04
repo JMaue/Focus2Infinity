@@ -1,15 +1,31 @@
 @using System.Globalization
 @inject NavigationManager Nav
+@inject IJSRuntime JSRuntime
+@inject IStringLocalizer<SharedResource> L
 
-<select class="form-select form-select-sm" style="@SelectStyle" @bind="selected" @bind:after="OnCultureChanged" aria-label="Language selector">
-  <option value="en">English</option>
-  <option value="de">Deutsch</option>
-  <option value="nl">Nederlands</option>
-  <option value="fr">Français</option>
-</select>
+@rendermode InteractiveServer
+
+@if (hasConsent)
+{
+  <select class="form-select form-select-sm" style="@SelectStyle" @bind="selectedLanguage" @bind:after="OnCultureChanged" aria-label="Language selector">
+    <option value="en">English</option>
+    <option value="de">Deutsch</option>
+    <option value="nl">Nederlands</option>
+    <option value="fr">Français</option>
+  </select>
+}
+else
+{
+  <div class="language-flag-only" style="@FlagOnlyStyle" title="@L["Accept cookies to change language"]">
+    <img src="@FlagPath" alt="@CurrentLanguageName" style="width: 1.25rem; height: auto;" />
+    <span class="ms-2">@CurrentLanguageName</span>
+  </div>
+}
 
 @code {
-  private string selected = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName switch
+  private bool hasConsent = false;
+  
+  private string selectedLanguage = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName switch
   {
     "de" => "de",
     "nl" => "nl",
@@ -17,7 +33,15 @@
     _ => "en"
   };
 
-  private string FlagPath => selected switch
+  private string CurrentLanguageName => selectedLanguage switch
+  {
+    "de" => "Deutsch",
+    "nl" => "Nederlands",
+    "fr" => "Français",
+    _ => "English"
+  };
+
+  private string FlagPath => selectedLanguage switch
   {
     "de" => "flags/germany.svg",
     "nl" => "flags/netherlands.svg",
@@ -29,10 +53,91 @@
   private string SelectStyle =>
     $"background-image: url('{FlagPath}'); background-repeat: no-repeat; background-position: right .6rem center; background-size: 1.25rem auto; padding-right: 2rem; background-color: #000; color: #fff; border-color: #444;";
 
-  private void OnCultureChanged()
+  // Style for flag-only display (when no consent)
+  private string FlagOnlyStyle =>
+    "display: inline-flex; align-items: center; padding: 0.25rem 0.5rem; background-color: #000; color: #fff; border: 1px solid #444; border-radius: 0.25rem; ";
+  // cursor: not-allowed; opacity: 0.7;
+
+  protected override async Task OnAfterRenderAsync(bool firstRender)
   {
-    var culture = selected;
-    var returnUrl = Uri.EscapeDataString(Nav.Uri);
-    Nav.NavigateTo($"/set-language?culture={culture}&returnUrl={returnUrl}", forceLoad: true);
+    if (firstRender)
+    {
+      hasConsent = await CheckCookieConsent();
+      StateHasChanged();
+    }
+  }
+
+  private async Task OnCultureChanged()
+  {
+    var culture = selectedLanguage;
+    var uri = new Uri(Nav.Uri);
+    
+    // Build the target URL with culture query parameters
+    var uriBuilder = new UriBuilder(uri)
+    {
+      Query = $"culture={culture}&ui-culture={culture}"
+    };
+    
+    if (hasConsent)
+    {
+      // User has given consent - set persistent cookie
+      await SetLanguageCookie(culture);
+      
+      // Store in sessionStorage for immediate use
+      await JSRuntime.InvokeVoidAsync("sessionStorage.setItem", "selectedLanguage", culture);
+      
+      // Navigate without query parameters (cookie will be used)
+      Nav.NavigateTo(uri.PathAndQuery, forceLoad: true);
+    }
+    else
+    {
+      // This shouldn't happen since selector is disabled, but handle it anyway
+      // No consent - store only in sessionStorage (transient)
+      await JSRuntime.InvokeVoidAsync("sessionStorage.setItem", "selectedLanguage", culture);
+      
+      // Navigate with query parameters (transient language)
+      Nav.NavigateTo(uriBuilder.Uri.PathAndQuery, forceLoad: true);
+    }
+  }
+
+  private async Task<bool> CheckCookieConsent()
+  {
+    try
+    {
+      // First check sessionStorage (current session)
+      var sessionConsent = await JSRuntime.InvokeAsync<string>("sessionStorage.getItem", "cookieConsent");
+      if (!string.IsNullOrEmpty(sessionConsent))
+      {
+        return sessionConsent == "accepted";
+      }
+      
+      // Then check cookie (from previous session)
+      var cookieConsent = await JSRuntime.InvokeAsync<string>("eval",
+        "document.cookie.split('; ').find(row => row.startsWith('cookieConsent='))?.split('=')[1] || ''");
+      
+      return cookieConsent == "accepted";
+    }
+    catch
+    {
+      return false;
+    }
+  }
+
+  private async Task SetLanguageCookie(string culture)
+  {
+    try
+    {
+      var isSecure = Nav.Uri.StartsWith("https://");
+      var secureFlag = isSecure ? "; Secure" : "";
+      
+      // Set the ASP.NET Core culture cookie
+      var cookieValue = $"c={culture}|uic={culture}";
+      await JSRuntime.InvokeVoidAsync("eval",
+        $"document.cookie = '.AspNetCore.Culture={cookieValue}; path=/; max-age=31536000; SameSite=Lax{secureFlag}'");
+    }
+    catch
+    {
+      // Ignore errors
+    }
   }
 }

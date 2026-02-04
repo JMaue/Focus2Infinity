@@ -33,7 +33,18 @@ try
     var file = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "account");
     var settings = File.ReadAllLines(file);
 
+    // con figure 
+    builder.Services.Configure<CookiePolicyOptions>(options =>
+    {
+      options.ConsentCookie.Name = "ConsentCookie";
+      options.CheckConsentNeeded = context => true;
+        options.MinimumSameSitePolicy = SameSiteMode.Lax;
+        options.Secure = CookieSecurePolicy.Always;
+    });
+    
     // Add services to the container.
+    //builder.Services.AddControllers(); // Add MVC controllers
+    //builder.Services.AddHttpClient(); // Add HttpClient for API calls
     builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
     builder.Services.AddRazorComponents().AddInteractiveServerComponents();
     builder.Services.AddSingleton<F2IDataService>();
@@ -65,6 +76,8 @@ try
 
     app.UseHttpsRedirection();
 
+    app.UseCookiePolicy();
+
     // Request localization (English/German/Dutch/French)
     var supportedCultures = new[] { "en", "de", "nl", "fr" }
         .Select(c => new CultureInfo(c))
@@ -77,6 +90,7 @@ try
         SupportedUICultures = supportedCultures,
         RequestCultureProviders = new List<IRequestCultureProvider>
         {
+           // new QueryStringRequestCultureProvider { QueryStringKey = "culture", UIQueryStringKey = "ui-culture" }, // Allow culture via query string (for non-consented users)
             new CookieRequestCultureProvider(),
             new AcceptLanguageHeaderRequestCultureProvider()
         }
@@ -89,36 +103,36 @@ try
     app.UseAntiforgery();
 
     // Minimal endpoint to switch language via cookie
-    app.MapGet("/set-language", (string culture, string? returnUrl, HttpContext http) =>
-    {
-        if (culture is not ("en" or "de" or "nl" or "fr"))
-        {
-            return Results.BadRequest("Unsupported culture");
-        }
+    //app.MapGet("/set-language", (string culture, string? returnUrl, HttpContext http) =>
+    //{
+    //    if (culture is not ("en" or "de" or "nl" or "fr"))
+    //    {
+    //        return Results.BadRequest("Unsupported culture");
+    //    }
 
-        var cookieValue = CookieRequestCultureProvider.MakeCookieValue(new RequestCulture(culture));
-        http.Response.Cookies.Append(
-            CookieRequestCultureProvider.DefaultCookieName,
-            cookieValue,
-            new CookieOptions
-            {
-                Expires = DateTimeOffset.UtcNow.AddYears(1),
-                IsEssential = true,
-                HttpOnly = false,
-                // Allow cookie over HTTP in dev so the switch works locally
-                Secure = http.Request.IsHttps,
-                SameSite = SameSiteMode.Lax,
-                Path = "/"
-            });
+    //    var cookieValue = CookieRequestCultureProvider.MakeCookieValue(new RequestCulture(culture));
+    //    http.Response.Cookies.Append(
+    //        CookieRequestCultureProvider.DefaultCookieName,
+    //        cookieValue,
+    //        new CookieOptions
+    //        {
+    //            Expires = DateTimeOffset.UtcNow.AddYears(1),
+    //            IsEssential = true,
+    //            HttpOnly = false,
+    //            // Allow cookie over HTTP in dev so the switch works locally
+    //            Secure = http.Request.IsHttps,
+    //            SameSite = SameSiteMode.Lax,
+    //            Path = "/"
+    //        });
 
-        return Results.Redirect(string.IsNullOrWhiteSpace(returnUrl) ? "/" : returnUrl);
-    });
+    //    return Results.Redirect(string.IsNullOrWhiteSpace(returnUrl) ? "/" : returnUrl);
+    //});
 
     app.MapRazorComponents<App>()
        .AddInteractiveServerRenderMode();
 
     Log.Information("Application configured successfully");
-    
+  
     app.Run();
 }
 catch (Exception ex)
