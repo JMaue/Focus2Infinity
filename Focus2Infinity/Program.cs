@@ -102,32 +102,6 @@ try
     app.UseStaticFiles();
     app.UseAntiforgery();
 
-    // Minimal endpoint to switch language via cookie
-    //app.MapGet("/set-language", (string culture, string? returnUrl, HttpContext http) =>
-    //{
-    //    if (culture is not ("en" or "de" or "nl" or "fr"))
-    //    {
-    //        return Results.BadRequest("Unsupported culture");
-    //    }
-
-    //    var cookieValue = CookieRequestCultureProvider.MakeCookieValue(new RequestCulture(culture));
-    //    http.Response.Cookies.Append(
-    //        CookieRequestCultureProvider.DefaultCookieName,
-    //        cookieValue,
-    //        new CookieOptions
-    //        {
-    //            Expires = DateTimeOffset.UtcNow.AddYears(1),
-    //            IsEssential = true,
-    //            HttpOnly = false,
-    //            // Allow cookie over HTTP in dev so the switch works locally
-    //            Secure = http.Request.IsHttps,
-    //            SameSite = SameSiteMode.Lax,
-    //            Path = "/"
-    //        });
-
-    //    return Results.Redirect(string.IsNullOrWhiteSpace(returnUrl) ? "/" : returnUrl);
-    //});
-
     app.MapRazorComponents<App>()
        .AddInteractiveServerRenderMode();
 
