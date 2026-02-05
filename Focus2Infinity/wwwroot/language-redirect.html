@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Language Set</title>
+    <script>
+        // Store selected language in sessionStorage for transient persistence
+        var params = new URLSearchParams(window.location.search);
+        var culture = params.get('culture');
+        if (culture) {
+            sessionStorage.setItem('selectedLanguage', culture);
+        }
+        // Redirect to return URL
+        var returnUrl = params.get('returnUrl');
+        if (returnUrl) {
+            window.location.href = decodeURIComponent(returnUrl);
+        } else {
+            window.location.href = '/';
+        }
+    </script>
+</head>
+<body>
+    <p>Redirecting...</p>
+</body>
+</html>
