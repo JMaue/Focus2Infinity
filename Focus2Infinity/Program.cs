@@ -2,6 +2,7 @@ using Focus2Infinity.Components;
 using Focus2Infinity.Data;
 using Focus2Infinity.Services;
 using Microsoft.AspNetCore.Localization;
+using Microsoft.AspNetCore.Hosting.Server.Features;
 using System.Globalization;
 using Serilog;
 using Serilog.Events;
@@ -106,8 +107,15 @@ try
        .AddInteractiveServerRenderMode();
 
     Log.Information("Application configured successfully");
-  
+    Log.Information("Environment: {Environment}", app.Environment.EnvironmentName);
+
     app.Run();
+    //app.Start();
+    //var addresses = app.Services.GetRequiredService<Microsoft.AspNetCore.Hosting.Server.IServer>()
+    //    .Features.Get<IServerAddressesFeature>()?.Addresses;
+    //Log.Information("Listening on: {Urls}", addresses is null ? "<not available>" : string.Join(";", addresses));
+  
+    //app.WaitForShutdown();
 }
 catch (Exception ex)
 {

@@ -1,4 +1,4 @@
-﻿namespace Focus2Infinity.Data
+namespace Focus2Infinity.Data
 {
   using Microsoft.Extensions.Localization;
   using System.Collections.Generic;
@@ -193,9 +193,9 @@
       bool rc = false;
       await Task.Run(() =>
       {
-        rc = DoOverlayExists(topic, src);
+        // Check for both old JPG overlay and new JSON overlay
+        rc = DoOverlayExists(topic, src) || DoOverlayJsonExists(topic, src);
       });
-
       return rc;
     }
 
@@ -205,6 +205,60 @@
       string htmlFilePath = $"{Path.Combine(root, "img", topic, $"ovl_{src}")}";
 
       return File.Exists(htmlFilePath);
+    }
+
+    private bool DoOverlayJsonExists(string topic, string src)
+    {
+      var root = _hostingEnvironment.WebRootPath;
+      var baseWithoutExt = Path.GetFileNameWithoutExtension(src);
+      string jsonFilePath = $"{Path.Combine(root, "img", topic, $"{baseWithoutExt}.overlay.json")}";
+      return File.Exists(jsonFilePath);
+    }
+
+    public async Task<OverlayData?> GetOverlayData(string topic, string src)
+    {
+      OverlayData? rc = null;
+      var ui = CultureInfo.CurrentUICulture;
+      
+      await Task.Run(() =>
+      {
+        rc = DoGetOverlayData(topic, src, ui);
+      });
+      
+      return rc;
+    }
+
+    private OverlayData? DoGetOverlayData(string topic, string src, CultureInfo ui)
+    {
+      var root = _hostingEnvironment.WebRootPath;
+      var baseWithoutExt = Path.GetFileNameWithoutExtension(src);
+      
+      // Try localized overlay first, then neutral
+      var candidates = new[]
+      {
+        Path.Combine(root, "img", topic, $"{baseWithoutExt}.overlay.{ui.TwoLetterISOLanguageName}.json"),
+        Path.Combine(root, "img", topic, $"{baseWithoutExt}.overlay.json")
+      };
+
+      foreach (var candidate in candidates)
+      {
+        if (File.Exists(candidate))
+        {
+          try
+          {
+            string jsonString = File.ReadAllText(candidate);
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            return JsonSerializer.Deserialize<OverlayData>(jsonString, options);
+          }
+          catch (Exception)
+          {
+            // If JSON parsing fails, return null
+            return null;
+          }
+        }
+      }
+
+      return null;
     }
 
     public string Unwrap(string input)

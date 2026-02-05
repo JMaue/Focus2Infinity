@@ -1,0 +1,76 @@
+@using Focus2Infinity.Data
+@using Focus2Infinity
+@using System.Net
+@inject IStringLocalizer<SharedResource> L
+
+@if (OverlayData != null)
+{
+    <svg class="svg-overlay @(ShowOverlay ? "svg-overlay-visible" : "svg-overlay-hidden")">
+        @* Lines *@
+        @foreach (var line in OverlayData.Lines)
+        {
+            @if (line.UsePercentage)
+            {
+                <line x1="@($"{line.X1}%")" y1="@($"{line.Y1}%")" 
+                      x2="@($"{line.X2}%")" y2="@($"{line.Y2}%")" 
+                      stroke="@line.Color" 
+                      stroke-width="@line.StrokeWidth" />
+            }
+            else
+            {
+                <line x1="@line.X1" y1="@line.Y1" 
+                      x2="@line.X2" y2="@line.Y2" 
+                      stroke="@line.Color" 
+                      stroke-width="@line.StrokeWidth" />
+            }
+        }
+
+        @* Circles *@
+        @foreach (var circle in OverlayData.Circles)
+        {
+            @if (circle.UsePercentage)
+            {
+                <circle cx="@($"{circle.Cx}%")" cy="@($"{circle.Cy}%")" 
+                        r="@($"{circle.Radius}%")" 
+                        stroke="@circle.Color" 
+                        stroke-width="@circle.StrokeWidth"
+                        fill="@(circle.Fill ? circle.Color : "none")" />
+            }
+            else
+            {
+                <circle cx="@circle.Cx" cy="@circle.Cy" 
+                        r="@circle.Radius" 
+                        stroke="@circle.Color" 
+                        stroke-width="@circle.StrokeWidth"
+                        fill="@(circle.Fill ? circle.Color : "none")" />
+            }
+        }
+
+        @* Text Labels *@
+        @foreach (var text in OverlayData.Texts)
+        {
+            var displayText = !string.IsNullOrEmpty(text.TextKey) 
+                ? L[text.TextKey].Value 
+                : text.Text;
+                
+            @((MarkupString)GetTextElementHtml(text, displayText))
+        }
+    </svg>
+}
+
+@code {
+    [Parameter]
+    public OverlayData? OverlayData { get; set; }
+
+    [Parameter]
+    public bool ShowOverlay { get; set; }
+
+    private string GetTextElementHtml(OverlayText text, string displayText)
+    {
+        var x = text.UsePercentage ? $"{text.X}%" : text.X.ToString();
+        var y = text.UsePercentage ? $"{text.Y}%" : text.Y.ToString();
+        var escapedText = WebUtility.HtmlEncode(displayText);
+        
+        return $"<text x=\"{x}\" y=\"{y}\" fill=\"{text.Color}\" font-size=\"{text.FontSize}\" font-family=\"{text.FontFamily}\" dominant-baseline=\"middle\" text-anchor=\"middle\">{escapedText}</text>";
+    }
+}
