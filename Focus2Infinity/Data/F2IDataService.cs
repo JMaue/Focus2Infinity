@@ -211,8 +211,30 @@ namespace Focus2Infinity.Data
     {
       var root = _hostingEnvironment.WebRootPath;
       var baseWithoutExt = Path.GetFileNameWithoutExtension(src);
-      string jsonFilePath = $"{Path.Combine(root, "img", topic, $"{baseWithoutExt}.overlay.json")}";
-      return File.Exists(jsonFilePath);
+      var svgPath = Path.Combine(root, "img", topic, $"svg_{baseWithoutExt}.overlay.json");
+      if (File.Exists(svgPath)) return true;
+      var legacyPath = Path.Combine(root, "img", topic, $"{baseWithoutExt}.overlay.json");
+      return File.Exists(legacyPath);
+    }
+
+    public string GetOverlayPathForImage(string topic, string src)
+    {
+      var root = _hostingEnvironment.WebRootPath;
+      var baseWithoutExt = Path.GetFileNameWithoutExtension(src);
+      return Path.Combine(root, "img", topic, $"svg_{baseWithoutExt}.overlay.json");
+    }
+
+    private static readonly JsonSerializerOptions OverlayJsonOptions = new()
+    {
+      PropertyNameCaseInsensitive = true,
+      WriteIndented = true
+    };
+
+    public void SaveOverlayData(string topic, string src, OverlayData data)
+    {
+      var path = GetOverlayPathForImage(topic, src);
+      var json = JsonSerializer.Serialize(data, OverlayJsonOptions);
+      File.WriteAllText(path, json);
     }
 
     public async Task<OverlayData?> GetOverlayData(string topic, string src)
@@ -232,10 +254,12 @@ namespace Focus2Infinity.Data
     {
       var root = _hostingEnvironment.WebRootPath;
       var baseWithoutExt = Path.GetFileNameWithoutExtension(src);
-      
-      // Try localized overlay first, then neutral
+
+      // Try svg_ prefix first, then legacy (localized then neutral)
       var candidates = new[]
       {
+        Path.Combine(root, "img", topic, $"svg_{baseWithoutExt}.overlay.{ui.TwoLetterISOLanguageName}.json"),
+        Path.Combine(root, "img", topic, $"svg_{baseWithoutExt}.overlay.json"),
         Path.Combine(root, "img", topic, $"{baseWithoutExt}.overlay.{ui.TwoLetterISOLanguageName}.json"),
         Path.Combine(root, "img", topic, $"{baseWithoutExt}.overlay.json")
       };
@@ -247,12 +271,10 @@ namespace Focus2Infinity.Data
           try
           {
             string jsonString = File.ReadAllText(candidate);
-            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-            return JsonSerializer.Deserialize<OverlayData>(jsonString, options);
+            return JsonSerializer.Deserialize<OverlayData>(jsonString, OverlayJsonOptions);
           }
           catch (Exception)
           {
-            // If JSON parsing fails, return null
             return null;
           }
         }

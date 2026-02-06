@@ -4,9 +4,12 @@
 @using System.Web
 @using Focus2Infinity.Data
 @using Focus2Infinity
+@using Focus2Infinity.Options
 @using Microsoft.Extensions.Localization
+@using Microsoft.Extensions.Options
 @inject F2IDataService f2iDataService
 @inject IStringLocalizer<SharedResource> L
+@inject IOptions<OverlayEditorOptions> OverlayEditorOptions
 
 @rendermode InteractiveServer
 
@@ -29,6 +32,12 @@
       </div>
     </div>
     <div class=@ColSizeTxt>
+      @if (OverlayEditorOptions.Value.Enabled)
+      {
+        <p class="small mb-2">
+          <a href="@EditOverlayUrl">Edit overlay</a>
+        </p>
+      }
       <Cmp_TextCard Topic=@Topic Src=@Name Details="true" HasOverlay="@(_hasOverlayImg || _overlayData != null)" />
     </div>
   </div>
@@ -46,6 +55,7 @@ else
 
   private string ImgFile => $"img/{Topic}/{Name}";
   private string OverlayImgFile => $"img/{Topic}/ovl_{Name}";
+  private string EditOverlayUrl => $"/editor/{Uri.EscapeDataString(Topic)}/{Uri.EscapeDataString(Name)}";
   private string CSI => _portrait ? "col-sm-6" : "col-sm-8";
   private string ColSizeImg => $"col-12 {CSI} d-flex justify-content-end";
   private string CST => _portrait ? "col-sm-6" : "col-sm-4";

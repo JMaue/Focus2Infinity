@@ -1,5 +1,6 @@
 using Focus2Infinity.Components;
 using Focus2Infinity.Data;
+using Focus2Infinity.Options;
 using Focus2Infinity.Services;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Hosting.Server.Features;
@@ -47,6 +48,7 @@ try
     //builder.Services.AddControllers(); // Add MVC controllers
     //builder.Services.AddHttpClient(); // Add HttpClient for API calls
     builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
+    builder.Services.Configure<OverlayEditorOptions>(builder.Configuration.GetSection(OverlayEditorOptions.SectionName));
     builder.Services.AddRazorComponents().AddInteractiveServerComponents();
     builder.Services.AddSingleton<F2IDataService>();
     builder.Services.AddSingleton<ICommentValidationService>(sp =>

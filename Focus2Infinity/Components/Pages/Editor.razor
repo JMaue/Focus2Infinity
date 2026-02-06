@@ -1,0 +1,389 @@
+@page "/editor"
+@page "/editor/{Topic}/{Name}"
+@using Focus2Infinity.Data
+@using Focus2Infinity
+@using Focus2Infinity.Options
+@using Microsoft.Extensions.Options
+@using System.Text.Json
+@using System.Net
+@inject F2IDataService f2iDataService
+@inject IStringLocalizer<SharedResource> L
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+@inject IOptions<OverlayEditorOptions> OverlayEditorOptions
+
+@rendermode InteractiveServer
+
+@if (!OverlayEditorOptions.Value.Enabled)
+{
+  <p class="my-3">The Overlay Editor is not available on this server. It is only enabled when running locally.</p>
+  <p><a href="/">Back to home</a></p>
+}
+else if (!_isCanvasMode)
+{
+  @* Browser: list topics and images *@
+  <h3 class="my-3">Overlay Editor – choose image</h3>
+  @if (_topics == null)
+  {
+    <p>Loading...</p>
+  }
+  else
+  {
+    <div class="row">
+      <div class="col-md-4">
+        <h5>Topic</h5>
+        <ul class="list-group">
+          @foreach (var topic in _topics)
+          {
+            <li class="list-group-item list-group-item-action @(_selectedTopic == topic ? "active" : "")" @onclick='() => SelectTopic(topic)'>
+              @L[topic]
+            </li>
+          }
+        </ul>
+      </div>
+      <div class="col-md-8">
+        @if (_selectedTopic != null)
+        {
+          <h5>Images in @L[_selectedTopic]</h5>
+          @if (_images == null)
+          {
+            <p>Loading...</p>
+          }
+          else
+          {
+            <ul class="list-group">
+              @foreach (var name in _images)
+              {
+                var hasOverlay = _overlayExists.GetValueOrDefault((_selectedTopic, name));
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                  <a href="@GetEditorUrl(_selectedTopic, name)">@name</a>
+                  @if (hasOverlay)
+                  {
+                    <span class="badge bg-success">overlay</span>
+                  }
+                </li>
+              }
+            </ul>
+          }
+        }
+      </div>
+    </div>
+  }
+}
+else
+{
+  @* Canvas: edit overlay for Topic/Name *@
+  <div class="d-flex flex-column">
+    <div class="d-flex align-items-center gap-2 flex-wrap mb-2">
+      <a href="/editor" class="btn btn-outline-secondary">Back to browser</a>
+      <span class="text-muted">@Name</span>
+      <div class="btn-group" role="group">
+        <button type="button" class="btn @(_tool == EditorTool.Line ? "btn-primary" : "btn-outline-primary")" @onclick='() => _tool = EditorTool.Line'>Line</button>
+        <button type="button" class="btn @(_tool == EditorTool.Circle ? "btn-primary" : "btn-outline-primary")" @onclick='() => _tool = EditorTool.Circle'>Circle</button>
+        <button type="button" class="btn @(_tool == EditorTool.Text ? "btn-primary" : "btn-outline-primary")" @onclick='() => _tool = EditorTool.Text'>Text</button>
+      </div>
+      <label class="d-flex align-items-center gap-1">
+        Color <input type="color" @bind="_strokeColor" class="form-control form-control-color" style="width:2.5rem;height:2rem" />
+      </label>
+      <label class="d-flex align-items-center gap-1">
+        Stroke <input type="number" @bind="_strokeWidth" @bind:event="oninput" min="0.5" max="20" step="0.5" class="form-control" style="width:4rem" />
+      </label>
+      <label class="d-flex align-items-center gap-1">
+        Font size <input type="number" @bind="_fontSize" @bind:event="oninput" min="8" max="72" class="form-control" style="width:4rem" />
+      </label>
+      <button class="btn btn-outline-secondary" @onclick="Undo" disabled="@(_undoStack.Count == 0)">Undo</button>
+      <button class="btn btn-success" @onclick="Save">Save</button>
+    </div>
+
+    <div class="d-flex flex-grow-1" style="min-height:400px">
+      <div class="position-relative me-3" id="canvas-container" style="max-width:900px;max-height:600px;flex:1"
+           @onmousedown="OnCanvasMouseDown"
+           @onmousemove="OnCanvasMouseMove"
+           @onmouseup="OnCanvasMouseUp"
+           @onmouseleave="OnCanvasMouseLeave">
+        <img id="editor-image" src="@_imageUrl" alt="" style="width:100%;height:100%;object-fit:contain;display:block;pointer-events:none" />
+        <svg id="overlay-svg" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none">
+          @foreach (var line in _overlay.Lines)
+          {
+            <line x1="@(line.X1)%" y1="@(line.Y1)%" x2="@(line.X2)%" y2="@(line.Y2)%" stroke="@line.Color" stroke-width="2" />
+          }
+          @foreach (var circle in _overlay.Circles)
+          {
+            <circle cx="@(circle.Cx)%" cy="@(circle.Cy)%" r="@(circle.Radius)%" stroke="@circle.Color" stroke-width="2" fill="@(circle.Fill ? circle.Color : "none")" />
+          }
+          @foreach (var text in _overlay.Texts)
+          {
+            @((MarkupString)GetSvgTextHtml(text))
+          }
+          @if (_previewLine.HasValue)
+          {
+            (double X1, double Y1, double X2, double Y2) pl = _previewLine.Value;
+            <line x1="@(pl.X1)%" y1="@(pl.Y1)%" x2="@(pl.X2)%" y2="@(pl.Y2)%" stroke="@_strokeColor" stroke-width="2" stroke-dasharray="4,2" />
+          }
+          @if (_previewCircle.HasValue)
+          {
+            (double Cx, double Cy, double Radius) pc = _previewCircle.Value;
+            <circle cx="@(pc.Cx)%" cy="@(pc.Cy)%" r="@(pc.Radius)%" stroke="@_strokeColor" stroke-width="2" fill="none" stroke-dasharray="4,2" />
+          }
+        </svg>
+      </div>
+
+      <div class="border-start ps-3" style="min-width:220px">
+        <h6>Elements</h6>
+        <ul class="list-group list-group-flush small">
+          @{ var idx = 0; }
+          @foreach (var line in _overlay.Lines)
+          {
+            var i = idx++;
+            <li class="list-group-item d-flex justify-content-between align-items-center py-1 @(IsSelected("line", i) ? "active" : "")" @onclick='() => SelectElement("line", i)'>
+              Line @(i + 1) <button class="btn btn-sm btn-outline-danger" @onclick='() => DeleteLine(i)' @onclick:stopPropagation>Del</button>
+            </li>
+          }
+          @{ idx = 0; }
+          @foreach (var circle in _overlay.Circles)
+          {
+            var i = idx++;
+            <li class="list-group-item d-flex justify-content-between align-items-center py-1 @(IsSelected("circle", i) ? "active" : "")" @onclick='() => SelectElement("circle", i)'>
+              Circle @(i + 1) <button class="btn btn-sm btn-outline-danger" @onclick='() => DeleteCircle(i)' @onclick:stopPropagation>Del</button>
+            </li>
+          }
+          @{ idx = 0; }
+          @foreach (var text in _overlay.Texts)
+          {
+            var i = idx++;
+            <li class="list-group-item d-flex justify-content-between align-items-center py-1 @(IsSelected("text", i) ? "active" : "")" @onclick='() => SelectElement("text", i)'>
+              Text @(i + 1) <button class="btn btn-sm btn-outline-danger" @onclick='() => DeleteText(i)' @onclick:stopPropagation>Del</button>
+            </li>
+          }
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  @if (_showTextDialog)
+  {
+    <div class="modal show d-block" tabindex="-1" style="background:rgba(0,0,0,0.5)">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">Add text</div>
+          <div class="modal-body">
+            <input @ref="_textInputRef" type="text" class="form-control" @bind="_pendingText" placeholder="Label text" />
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-secondary" @onclick="CancelText">Cancel</button>
+            <button class="btn btn-primary" @onclick="ConfirmText">OK</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+}
+
+@code {
+  [Parameter] public string? Topic { get; set; }
+  [Parameter] public string? Name { get; set; }
+
+  private bool _isCanvasMode => !string.IsNullOrEmpty(Topic) && !string.IsNullOrEmpty(Name);
+  private string _imageUrl => _isCanvasMode ? $"img/{Topic}/{Name}" : "";
+
+  private List<string>? _topics;
+  private string? _selectedTopic;
+  private List<string>? _images;
+  private Dictionary<(string, string), bool> _overlayExists = new();
+
+  private async Task SelectTopic(string topic)
+  {
+    _selectedTopic = topic;
+    _images = await f2iDataService.GetSubTopicsSorted(topic, L);
+    _overlayExists.Clear();
+    if (_images != null)
+      foreach (var name in _images)
+        _overlayExists[(topic, name)] = await f2iDataService.OverlayExists(topic, name);
+    StateHasChanged();
+  }
+
+  private static string GetEditorUrl(string topic, string name) => $"/editor/{Uri.EscapeDataString(topic)}/{Uri.EscapeDataString(name)}";
+
+  protected override async Task OnInitializedAsync()
+  {
+    _topics = await f2iDataService.GetMainTopics();
+    if (_isCanvasMode)
+    {
+      var loaded = await f2iDataService.GetOverlayData(Topic!, Name!);
+      if (loaded != null) _overlay = loaded;
+    }
+  }
+
+  protected override async Task OnAfterRenderAsync(bool firstRender)
+  {
+    if (_showTextDialog)
+    {
+      try { await _textInputRef.FocusAsync(); } catch { }
+    }
+  }
+
+  #region Canvas state and tools
+  private enum EditorTool { Line, Circle, Text }
+  private OverlayData _overlay = new();
+  private readonly List<OverlayData> _undoStack = new();
+  private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNameCaseInsensitive = true };
+
+  private EditorTool _tool = EditorTool.Line;
+  private string _strokeColor = "#ffff00";
+  private double _strokeWidth = 2;
+  private int _fontSize = 14;
+
+  private (double X1, double Y1, double X2, double Y2)? _previewLine;
+  private (double Cx, double Cy, double Radius)? _previewCircle;
+  private double? _lineStartX, _lineStartY;
+  private double? _circleCx, _circleCy;
+  private bool _isDrawing;
+
+  private bool _showTextDialog;
+  private double _pendingTextX, _pendingTextY;
+  private string _pendingText = "";
+  private string? _selectedType;
+  private int _selectedIndex = -1;
+  private ElementReference _textInputRef;
+
+  private bool IsSelected(string type, int index) => _selectedType == type && _selectedIndex == index;
+
+  private async Task<(double x, double y)?> GetPercentFromMouse(MouseEventArgs e)
+  {
+    try
+    {
+      var rect = await JS.InvokeAsync<CanvasRect>("overlayEditor.getCanvasRect", "canvas-container");
+      if (rect == null || rect.Width <= 0 || rect.Height <= 0) return null;
+      var x = (e.ClientX - rect.Left) / rect.Width * 100.0;
+      var y = (e.ClientY - rect.Top) / rect.Height * 100.0;
+      return (Math.Clamp(x, 0, 100), Math.Clamp(y, 0, 100));
+    }
+    catch { return null; }
+  }
+
+  private void PushUndo() => _undoStack.Add(CloneOverlay(_overlay));
+  private static OverlayData CloneOverlay(OverlayData src)
+  {
+    var json = JsonSerializer.Serialize(src, JsonOptions);
+    return JsonSerializer.Deserialize<OverlayData>(json, JsonOptions) ?? new OverlayData();
+  }
+
+  private async Task OnCanvasMouseDown(MouseEventArgs e)
+  {
+    var p = await GetPercentFromMouse(e);
+    if (p == null) return;
+    var (x, y) = p.Value;
+    if (_tool == EditorTool.Line)
+    {
+      _lineStartX = x; _lineStartY = y;
+      _previewLine = (x, y, x, y);
+      _isDrawing = true;
+    }
+    else if (_tool == EditorTool.Circle)
+    {
+      _circleCx = x; _circleCy = y;
+      _previewCircle = (x, y, 0);
+      _isDrawing = true;
+    }
+    else if (_tool == EditorTool.Text)
+    {
+      _pendingTextX = x; _pendingTextY = y;
+      _pendingText = "";
+      _showTextDialog = true;
+    }
+    StateHasChanged();
+  }
+
+  private async Task OnCanvasMouseMove(MouseEventArgs e)
+  {
+    var p = await GetPercentFromMouse(e);
+    if (p == null) return;
+    var (x, y) = p.Value;
+    if (_tool == EditorTool.Line && _isDrawing && _lineStartX.HasValue && _lineStartY.HasValue)
+      _previewLine = (_lineStartX.Value, _lineStartY.Value, x, y);
+    else if (_tool == EditorTool.Circle && _isDrawing && _circleCx.HasValue && _circleCy.HasValue)
+      _previewCircle = (_circleCx.Value, _circleCy.Value, Math.Min(Math.Sqrt(Math.Pow(x - _circleCx.Value, 2) + Math.Pow(y - _circleCy.Value, 2)), 50));
+    else if (!_isDrawing)
+    {  
+      _previewLine = null;
+      _previewCircle = null;
+    }
+    StateHasChanged();
+  }
+
+  private async Task OnCanvasMouseUp(MouseEventArgs e)
+  {
+    if (!_isDrawing) return;
+    var p = await GetPercentFromMouse(e);
+    if (p == null) return;
+    var (x, y) = p.Value;
+    if (_tool == EditorTool.Line && _lineStartX.HasValue && _lineStartY.HasValue)
+    {
+      var dx = Math.Abs(x - _lineStartX.Value); var dy = Math.Abs(y - _lineStartY.Value);
+      if (dx >= 0.5 || dy >= 0.5)
+      {
+        PushUndo();
+        _overlay.Lines.Add(new OverlayLine { X1 = _lineStartX.Value, Y1 = _lineStartY.Value, X2 = x, Y2 = y, Color = _strokeColor, StrokeWidth = _strokeWidth, UsePercentage = true });
+      }
+    }
+    else if (_tool == EditorTool.Circle && _circleCx.HasValue && _circleCy.HasValue)
+    {
+      var r = Math.Sqrt(Math.Pow(x - _circleCx.Value, 2) + Math.Pow(y - _circleCy.Value, 2));
+      PushUndo();
+      _overlay.Circles.Add(new OverlayCircle { Cx = _circleCx.Value, Cy = _circleCy.Value, Radius = Math.Min(r, 50), Color = _strokeColor, StrokeWidth = _strokeWidth, Fill = false, UsePercentage = true });
+    }
+    _lineStartX = _lineStartY = _circleCx = _circleCy = null;
+    _previewLine = null;
+    _previewCircle = null;
+    _isDrawing = false;
+    StateHasChanged();
+  }
+
+  private void OnCanvasMouseLeave()
+  {
+    if (!_isDrawing) return;
+    _lineStartX = _lineStartY = _circleCx = _circleCy = null;
+    _previewLine = null;
+    _previewCircle = null;
+    _isDrawing = false;
+    StateHasChanged();
+  }
+
+  private void ConfirmText()
+  {
+    PushUndo();
+    _overlay.Texts.Add(new OverlayText { X = _pendingTextX, Y = _pendingTextY, Text = _pendingText ?? "", Color = _strokeColor, FontSize = _fontSize, FontFamily = "Arial, sans-serif", UsePercentage = true });
+    _showTextDialog = false; _pendingText = "";
+    StateHasChanged();
+  }
+
+  private void CancelText() { _showTextDialog = false; _pendingText = ""; StateHasChanged(); }
+  private void SelectElement(string type, int index) { _selectedType = type; _selectedIndex = index; StateHasChanged(); }
+  private void DeleteLine(int index) { PushUndo(); _overlay.Lines.RemoveAt(index); _selectedType = null; _selectedIndex = -1; StateHasChanged(); }
+  private void DeleteCircle(int index) { PushUndo(); _overlay.Circles.RemoveAt(index); _selectedType = null; _selectedIndex = -1; StateHasChanged(); }
+  private void DeleteText(int index) { PushUndo(); _overlay.Texts.RemoveAt(index); _selectedType = null; _selectedIndex = -1; StateHasChanged(); }
+
+  private static string GetSvgTextHtml(OverlayText t)
+  {
+    var escaped = WebUtility.HtmlEncode(t.Text);
+    return $"<text x=\"{t.X}%\" y=\"{t.Y}%\" fill=\"{t.Color}\" font-size=\"{t.FontSize}\" font-family=\"{t.FontFamily}\" dominant-baseline=\"middle\" text-anchor=\"middle\">{escaped}</text>";
+  }
+
+  private void Undo()
+  {
+    if (_undoStack.Count == 0) return;
+    _overlay = _undoStack[^1];
+    _undoStack.RemoveAt(_undoStack.Count - 1);
+    StateHasChanged();
+  }
+
+  private void Save()
+  {
+    if (!_isCanvasMode) return;
+    f2iDataService.SaveOverlayData(Topic!, Name!, _overlay);
+    StateHasChanged();
+  }
+
+  private class CanvasRect { public double Left { get; set; } public double Top { get; set; } public double Width { get; set; } public double Height { get; set; } }
+  #endregion
+}

@@ -1,7 +1,10 @@
-﻿@using Focus2Infinity.Data
+@using Focus2Infinity.Data
 @using Focus2Infinity
+@using Focus2Infinity.Options
+@using Microsoft.Extensions.Options
 @inject F2IDataService f2iDataService
 @inject IStringLocalizer<SharedResource> L
+@inject IOptions<OverlayEditorOptions> OverlayEditorOptions
 
 @rendermode InteractiveServer
 
@@ -27,6 +30,14 @@
           <li class="nav-item">
             <NavLink class="list-group-item list-group-item-action menu-button text-nowrap" href=@item.Key @onclick="ToggleNavMenu">
               @item.Value
+            </NavLink>
+          </li>
+        }
+        @if (OverlayEditorOptions.Value.Enabled)
+        {
+          <li class="nav-item">
+            <NavLink class="list-group-item list-group-item-action menu-button text-nowrap" href="/editor" @onclick="ToggleNavMenu">
+              Overlay Editor
             </NavLink>
           </li>
         }

@@ -6,11 +6,14 @@ The overlay system allows you to add annotations (lines, text labels, circles) t
 
 ## File Format
 
-Overlay data is stored as JSON files with the naming convention:
-- `{imagename}.overlay.json` - Neutral/default overlay
-- `{imagename}.overlay.{lang}.json` - Localized overlay (e.g., `image.overlay.de.json`)
+Overlay data is stored as JSON files. **New overlays** use the `svg_` prefix:
 
-**Example:** For image `Jupiter-Merkur-Widder.JPG`, create `Jupiter-Merkur-Widder.overlay.json`
+- **Preferred (editor default):** `svg_{imagename}.overlay.json` – written by the in-app Overlay Editor
+- **Legacy (still supported for read):** `{imagename}.overlay.json` and `{imagename}.overlay.{lang}.json`
+
+When loading, the app looks for `svg_`-prefixed files first, then falls back to the legacy names. This keeps existing overlays working until you re-save them from the editor.
+
+**Example:** For image `Jupiter-Merkur-Widder.JPG`, the editor saves `svg_Jupiter-Merkur-Widder.overlay.json` in the same folder as the image (`wwwroot/img/{topic}/`).
 
 ## JSON Structure
 
@@ -163,12 +166,21 @@ Then add the translation to your resource files:
 }
 ```
 
+## Overlay Editor
+
+The **Overlay Editor** is built into the Focus2Infinity Blazor Server app. Use it to create and edit overlay JSON by drawing lines, circles, and text on top of images.
+
+- **Open:** In the app navigation, click **Overlay Editor**, then choose a topic and an image. You can also use **Edit overlay** on an image’s detail page to jump straight into the editor for that image.
+- **Save:** Overlays are saved as `svg_{imagename}.overlay.json` in the same folder as the image. The main site loads both `svg_` and legacy overlay files.
+
+**Enabling only when running locally:** For deployment, the editor can be turned off. Set `OverlayEditor:Enabled` to `false` in `appsettings.Production.json` (or environment `OverlayEditor__Enabled=false`). The repo includes `appsettings.Production.json` with `Enabled: false` so the deployed site has no editor link or route; use `appsettings.Development.json` or local `appsettings.json` with `Enabled: true` for local editing.
+
 ## Migration from Old System
 
 The system is **backward compatible**:
 - Old `ovl_*.jpg` files continue to work
-- New JSON overlays take precedence if both exist
-- Gradually migrate overlays to JSON format
+- JSON overlays (with or without `svg_` prefix) take precedence when present
+- The app reads `svg_` first, then legacy `{name}.overlay.json`; the editor always writes `svg_` files
 
 ## Benefits
 
