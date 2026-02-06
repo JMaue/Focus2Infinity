@@ -72,7 +72,7 @@
     var y = text.UsePercentage ? SvgPct(text.Y) : SvgNum(text.Y);
     var escapedText = WebUtility.HtmlEncode(displayText);
 
-    return $"<text x=\"{x}\" y=\"{y}\" fill=\"{text.Color}\" font-size=\"{text.FontSize}\" font-family=\"{text.FontFamily}\" dominant-baseline=\"middle\" text-anchor=\"middle\">{escapedText}</text>";
+    return $"<text x=\"{x}\" y=\"{y}\" fill=\"{text.Color}\" font-size=\"{text.FontSize}\" font-family=\"{text.FontFamily}\" dominant-baseline=\"text-before-edge\" text-anchor=\"start\">{escapedText}</text>";
   }
 
   private static string SvgPct(double v) => v.ToString(CultureInfo.InvariantCulture) + "%";

@@ -255,13 +255,11 @@ namespace Focus2Infinity.Data
       var root = _hostingEnvironment.WebRootPath;
       var baseWithoutExt = Path.GetFileNameWithoutExtension(src);
 
-      // Try svg_ prefix first, then legacy (localized then neutral)
+      // Try svg_ prefix first
       var candidates = new[]
       {
         Path.Combine(root, "img", topic, $"svg_{baseWithoutExt}.overlay.{ui.TwoLetterISOLanguageName}.json"),
-        Path.Combine(root, "img", topic, $"svg_{baseWithoutExt}.overlay.json"),
-        Path.Combine(root, "img", topic, $"{baseWithoutExt}.overlay.{ui.TwoLetterISOLanguageName}.json"),
-        Path.Combine(root, "img", topic, $"{baseWithoutExt}.overlay.json")
+        Path.Combine(root, "img", topic, $"svg_{baseWithoutExt}.overlay.json")
       };
 
       foreach (var candidate in candidates)

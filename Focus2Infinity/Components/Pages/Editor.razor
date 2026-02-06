@@ -45,12 +45,23 @@ else
     </div>
 
     <div class="d-flex flex-grow-1" style="min-height:400px">
-      <div class="position-relative me-3" id="canvas-container" style="max-width:900px;max-height:600px;flex:1"
+      <div class="position-relative me-3" id="canvas-container" style="max-width:900px;max-height:600px;flex:1;cursor:none"
            @onmousedown="OnCanvasMouseDown"
            @onmousemove="OnCanvasMouseMove"
            @onmouseup="OnCanvasMouseUp"
            @onmouseleave="OnCanvasMouseLeave">
         <img id="editor-image" src="@_imageUrl" alt="" style="width:100%;height:100%;object-fit:contain;display:block;pointer-events:none" />
+        @if (_crosshairX.HasValue && _crosshairY.HasValue)
+        {
+          <div class="position-absolute pointer-events-none" style="left:@(_crosshairX.Value)px;top:@(_crosshairY.Value)px;transform:translate(-50%,-50%);width:21px;height:21px;">
+            <svg viewBox="0 0 21 21" style="display:block;filter:drop-shadow(0 0 1px black);">
+              <line x1="0" y1="10" x2="9" y2="10" stroke="white" stroke-width="1" />
+              <line x1="11" y1="10" x2="21" y2="10" stroke="white" stroke-width="1" />
+              <line x1="10" y1="0" x2="10" y2="9" stroke="white" stroke-width="1" />
+              <line x1="10" y1="11" x2="10" y2="21" stroke="white" stroke-width="1" />
+            </svg>
+          </div>
+        }
         <svg id="overlay-svg" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none">
           @foreach (var line in _overlay.Lines)
           {
@@ -175,6 +186,8 @@ else
   private double? _lineStartX, _lineStartY;
   private double? _circleCx, _circleCy;
   private bool _isDrawing;
+  private double? _crosshairX;
+  private double? _crosshairY;
 
   private bool _showTextDialog;
   private double _pendingTextX, _pendingTextY;
@@ -233,6 +246,16 @@ else
 
   private async Task OnCanvasMouseMove(MouseEventArgs e)
   {
+    try
+    {
+      var rect = await JS.InvokeAsync<CanvasRect>("overlayEditor.getCanvasRect", "canvas-container");
+      if (rect != null && rect.Width > 0 && rect.Height > 0)
+      {
+        _crosshairX = e.ClientX - rect.Left;
+        _crosshairY = e.ClientY - rect.Top;
+      }
+    }
+    catch { /* ignore */ }
     var p = await GetPercentFromMouse(e);
     if (p == null) return;
     var (x, y) = p.Value;
@@ -280,7 +303,9 @@ else
 
   private void OnCanvasMouseLeave()
   {
-    if (!_isDrawing) return;
+    _crosshairX = null;
+    _crosshairY = null;
+    if (!_isDrawing) { StateHasChanged(); return; }
     _lineStartX = _lineStartY = _circleCx = _circleCy = null;
     _previewLine = null;
     _previewCircle = null;
@@ -305,7 +330,7 @@ else
   private static string GetSvgTextHtml(OverlayText t)
   {
     var escaped = WebUtility.HtmlEncode(t.Text);
-    return $"<text x=\"{SvgPct(t.X)}\" y=\"{SvgPct(t.Y)}\" fill=\"{t.Color}\" font-size=\"{t.FontSize}\" font-family=\"{t.FontFamily}\" dominant-baseline=\"middle\" text-anchor=\"middle\">{escaped}</text>";
+    return $"<text x=\"{SvgPct(t.X)}\" y=\"{SvgPct(t.Y)}\" fill=\"{t.Color}\" font-size=\"{t.FontSize}\" font-family=\"{t.FontFamily}\" dominant-baseline=\"text-before-edge\" text-anchor=\"start\">{escaped}</text>";
   }
 
   private static string SvgPct(double v) => v.ToString(CultureInfo.InvariantCulture) + "%";
