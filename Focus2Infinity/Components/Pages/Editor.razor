@@ -1,9 +1,9 @@
-@page "/editor"
 @page "/editor/{Topic}/{Name}"
 @using Focus2Infinity.Data
 @using Focus2Infinity
 @using Focus2Infinity.Options
 @using Microsoft.Extensions.Options
+@using System.Globalization
 @using System.Text.Json
 @using System.Net
 @inject F2IDataService f2iDataService
@@ -19,63 +19,12 @@
   <p class="my-3">The Overlay Editor is not available on this server. It is only enabled when running locally.</p>
   <p><a href="/">Back to home</a></p>
 }
-else if (!_isCanvasMode)
-{
-  @* Browser: list topics and images *@
-  <h3 class="my-3">Overlay Editor – choose image</h3>
-  @if (_topics == null)
-  {
-    <p>Loading...</p>
-  }
-  else
-  {
-    <div class="row">
-      <div class="col-md-4">
-        <h5>Topic</h5>
-        <ul class="list-group">
-          @foreach (var topic in _topics)
-          {
-            <li class="list-group-item list-group-item-action @(_selectedTopic == topic ? "active" : "")" @onclick='() => SelectTopic(topic)'>
-              @L[topic]
-            </li>
-          }
-        </ul>
-      </div>
-      <div class="col-md-8">
-        @if (_selectedTopic != null)
-        {
-          <h5>Images in @L[_selectedTopic]</h5>
-          @if (_images == null)
-          {
-            <p>Loading...</p>
-          }
-          else
-          {
-            <ul class="list-group">
-              @foreach (var name in _images)
-              {
-                var hasOverlay = _overlayExists.GetValueOrDefault((_selectedTopic, name));
-                <li class="list-group-item d-flex justify-content-between align-items-center">
-                  <a href="@GetEditorUrl(_selectedTopic, name)">@name</a>
-                  @if (hasOverlay)
-                  {
-                    <span class="badge bg-success">overlay</span>
-                  }
-                </li>
-              }
-            </ul>
-          }
-        }
-      </div>
-    </div>
-  }
-}
 else
 {
   @* Canvas: edit overlay for Topic/Name *@
   <div class="d-flex flex-column">
     <div class="d-flex align-items-center gap-2 flex-wrap mb-2">
-      <a href="/editor" class="btn btn-outline-secondary">Back to browser</a>
+      <a href="@ImageDetailsUrl" class="btn btn-outline-secondary">Back to image</a>
       <span class="text-muted">@Name</span>
       <div class="btn-group" role="group">
         <button type="button" class="btn @(_tool == EditorTool.Line ? "btn-primary" : "btn-outline-primary")" @onclick='() => _tool = EditorTool.Line'>Line</button>
@@ -83,7 +32,7 @@ else
         <button type="button" class="btn @(_tool == EditorTool.Text ? "btn-primary" : "btn-outline-primary")" @onclick='() => _tool = EditorTool.Text'>Text</button>
       </div>
       <label class="d-flex align-items-center gap-1">
-        Color <input type="color" @bind="_strokeColor" class="form-control form-control-color" style="width:2.5rem;height:2rem" />
+        Color <input type="color" @bind="_strokeColor" class="form-control form-control-color" style="width:2.5rem;height:2.5rem" />
       </label>
       <label class="d-flex align-items-center gap-1">
         Stroke <input type="number" @bind="_strokeWidth" @bind:event="oninput" min="0.5" max="20" step="0.5" class="form-control" style="width:4rem" />
@@ -105,11 +54,11 @@ else
         <svg id="overlay-svg" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none">
           @foreach (var line in _overlay.Lines)
           {
-            <line x1="@(line.X1)%" y1="@(line.Y1)%" x2="@(line.X2)%" y2="@(line.Y2)%" stroke="@line.Color" stroke-width="2" />
+            <line x1="@SvgPct(line.X1)" y1="@SvgPct(line.Y1)" x2="@SvgPct(line.X2)" y2="@SvgPct(line.Y2)" stroke="@line.Color" stroke-width="@SvgNum(line.StrokeWidth)" />
           }
           @foreach (var circle in _overlay.Circles)
           {
-            <circle cx="@(circle.Cx)%" cy="@(circle.Cy)%" r="@(circle.Radius)%" stroke="@circle.Color" stroke-width="2" fill="@(circle.Fill ? circle.Color : "none")" />
+            <circle cx="@SvgPct(circle.Cx)" cy="@SvgPct(circle.Cy)" r="@SvgPct(circle.Radius)" stroke="@circle.Color" stroke-width="2" fill="@(circle.Fill ? circle.Color : "none")" />
           }
           @foreach (var text in _overlay.Texts)
           {
@@ -117,13 +66,13 @@ else
           }
           @if (_previewLine.HasValue)
           {
-            (double X1, double Y1, double X2, double Y2) pl = _previewLine.Value;
-            <line x1="@(pl.X1)%" y1="@(pl.Y1)%" x2="@(pl.X2)%" y2="@(pl.Y2)%" stroke="@_strokeColor" stroke-width="2" stroke-dasharray="4,2" />
+            (double X1, double Y1, double X2, double Y2) = _previewLine.Value;
+            <line x1="@SvgPct(X1)" y1="@SvgPct(Y1)" x2="@SvgPct(X2)" y2="@SvgPct(Y2)" stroke="@_strokeColor" stroke-width="2" stroke-dasharray="4,2" />
           }
           @if (_previewCircle.HasValue)
           {
             (double Cx, double Cy, double Radius) pc = _previewCircle.Value;
-            <circle cx="@(pc.Cx)%" cy="@(pc.Cy)%" r="@(pc.Radius)%" stroke="@_strokeColor" stroke-width="2" fill="none" stroke-dasharray="4,2" />
+            <circle cx="@SvgPct(pc.Cx)" cy="@SvgPct(pc.Cy)" r="@SvgPct(pc.Radius)" stroke="@_strokeColor" stroke-width="2" fill="none" stroke-dasharray="4,2" />
           }
         </svg>
       </div>
@@ -152,7 +101,7 @@ else
           {
             var i = idx++;
             <li class="list-group-item d-flex justify-content-between align-items-center py-1 @(IsSelected("text", i) ? "active" : "")" @onclick='() => SelectElement("text", i)'>
-              Text @(i + 1) <button class="btn btn-sm btn-outline-danger" @onclick='() => DeleteText(i)' @onclick:stopPropagation>Del</button>
+              Text (@text.Text) <button class="btn btn-sm btn-outline-danger" @onclick='() => DeleteText(i)' @onclick:stopPropagation>Del</button>
             </li>
           }
         </ul>
@@ -185,24 +134,12 @@ else
 
   private bool _isCanvasMode => !string.IsNullOrEmpty(Topic) && !string.IsNullOrEmpty(Name);
   private string _imageUrl => _isCanvasMode ? $"img/{Topic}/{Name}" : "";
+  private string ImageDetailsUrl => Topic != null && Name != null ? $"/imagedetails/{Uri.EscapeDataString(Topic)}/{Uri.EscapeDataString(Name)}" : "/";
 
   private List<string>? _topics;
   private string? _selectedTopic;
   private List<string>? _images;
   private Dictionary<(string, string), bool> _overlayExists = new();
-
-  private async Task SelectTopic(string topic)
-  {
-    _selectedTopic = topic;
-    _images = await f2iDataService.GetSubTopicsSorted(topic, L);
-    _overlayExists.Clear();
-    if (_images != null)
-      foreach (var name in _images)
-        _overlayExists[(topic, name)] = await f2iDataService.OverlayExists(topic, name);
-    StateHasChanged();
-  }
-
-  private static string GetEditorUrl(string topic, string name) => $"/editor/{Uri.EscapeDataString(topic)}/{Uri.EscapeDataString(name)}";
 
   protected override async Task OnInitializedAsync()
   {
@@ -229,8 +166,8 @@ else
   private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNameCaseInsensitive = true };
 
   private EditorTool _tool = EditorTool.Line;
-  private string _strokeColor = "#ffff00";
-  private double _strokeWidth = 2;
+  private string _strokeColor = "#ffffff";
+  private double _strokeWidth = 1;
   private int _fontSize = 14;
 
   private (double X1, double Y1, double X2, double Y2)? _previewLine;
@@ -300,11 +237,13 @@ else
     if (p == null) return;
     var (x, y) = p.Value;
     if (_tool == EditorTool.Line && _isDrawing && _lineStartX.HasValue && _lineStartY.HasValue)
+    {
       _previewLine = (_lineStartX.Value, _lineStartY.Value, x, y);
+    }
     else if (_tool == EditorTool.Circle && _isDrawing && _circleCx.HasValue && _circleCy.HasValue)
       _previewCircle = (_circleCx.Value, _circleCy.Value, Math.Min(Math.Sqrt(Math.Pow(x - _circleCx.Value, 2) + Math.Pow(y - _circleCy.Value, 2)), 50));
     else if (!_isDrawing)
-    {  
+    {
       _previewLine = null;
       _previewCircle = null;
     }
@@ -366,8 +305,11 @@ else
   private static string GetSvgTextHtml(OverlayText t)
   {
     var escaped = WebUtility.HtmlEncode(t.Text);
-    return $"<text x=\"{t.X}%\" y=\"{t.Y}%\" fill=\"{t.Color}\" font-size=\"{t.FontSize}\" font-family=\"{t.FontFamily}\" dominant-baseline=\"middle\" text-anchor=\"middle\">{escaped}</text>";
+    return $"<text x=\"{SvgPct(t.X)}\" y=\"{SvgPct(t.Y)}\" fill=\"{t.Color}\" font-size=\"{t.FontSize}\" font-family=\"{t.FontFamily}\" dominant-baseline=\"middle\" text-anchor=\"middle\">{escaped}</text>";
   }
+
+  private static string SvgPct(double v) => v.ToString(CultureInfo.InvariantCulture) + "%";
+  private static string SvgNum(double v) => v.ToString(CultureInfo.InvariantCulture);
 
   private void Undo()
   {
