@@ -31,6 +31,13 @@ namespace TranslationManager
               { "fr", "##fr.wikipedia.org/wiki/Message_d%27Arecibo##"} }
           ),
           new LinkInfo(
+            "##www.adastralapalma.com/tours-en/observatory-tour/##",
+            new Dictionary<string, string>
+            {
+              { "*", "##www.adastralapalma.com/tours-en/observatory-tour/##" }
+            }
+          ),
+          new LinkInfo(
             "##en.wikipedia.org/wiki/Pinwheel_Galaxy#/media/File:M101_hires_STScI-PRC2006-10a.jpg##",
             new Dictionary<string, string> {
               { "*", "##en.wikipedia.org/wiki/Pinwheel_Galaxy#/media/File:M101_hires_STScI-PRC2006-10a.jpg##" }
@@ -105,9 +112,61 @@ namespace TranslationManager
               { "en", "###Heart and Soul Nebula###en.wikipedia.org/wiki/Heart_Nebula###" },
               { "fr", "###Nébuleuse du Cœur###fr.wikipedia.org/wiki/IC_1805###"},
               { "nl", "###Hart- and Zielnevel###nl.wikipedia.org/wiki/Hartnevel###" }
-            }
-            )
-      };
+            }),
+          new LinkInfo(
+            "###Hexenkopfnebel###de.wikipedia.org/wiki/IC_2118###",
+            new Dictionary<string, string>
+            {
+              { "en", "###Witchhead Nebula###en.wikipedia.org/wiki/IC_2118###" },
+              { "nl", "###Heksenkopnevel###nl.wikipedia.org/wiki/NGC_1909###"},
+              { "fr", "###La nébuleuse de la Tête de Sorcière###fr.wikipedia.org/wiki/NGC_1909###" }
+            }),
+          new LinkInfo(
+            "###Feuerradgalaxie###de.wikipedia.org/wiki/Messier_101###",
+            new Dictionary<string, string>
+            {
+              { "en", "###Pinwheel Galaxy###en.wikipedia.org/wiki/Pinwheel_Galaxy###" },
+              { "nl", "###Windmolenstelsel###nl.wikipedia.org/wiki/Windmolenstelsel###"},
+              { "fr", "###Galaxie du Moulinet###fr.wikipedia.org/wiki/M101_(galaxie)###" }
+            }),
+          new LinkInfo(
+            "###NGC 2903###de.wikipedia.org/wiki/NGC_2903###",
+            new Dictionary<string, string>
+            {
+              { "en", "###NGC 2903###en.wikipedia.org/wiki/NGC_2903###" },
+              { "nl", "###NGC 2903###nl.wikipedia.org/wiki/NGC_2903###"},
+              { "fr", "###NGC 2903###fr.wikipedia.org/wiki/NGC_2903###" }
+            }),
+          new LinkInfo(
+            "###Medusa Nebel###de.wikipedia.org/wiki/Medusanebel###",
+            new Dictionary<string, string>
+            {
+              { "en", "###Medusa Nebula###en.wikipedia.org/wiki/Medusa_Nebula###" },
+              { "nl", "###Medusanevel###nl.wikipedia.org/wiki/Medusanevel###"},
+              { "fr", "###Nébuleuse de la Méduse###fr.wikipedia.org/wiki/Abell_21###" }
+            }),
+          new LinkInfo(
+            "###MAGIC-Teleskope###de.wikipedia.org/wiki/MAGIC-Teleskope###",
+            new Dictionary<string, string>
+            {
+              { "en", "###MAGIC-Teleskope###en.wikipedia.org/wiki/MAGIC_(telescope)###" },
+              { "nl", "###MAGIC-Teleskope###en.wikipedia.org/wiki/MAGIC_(telescope)###"},
+              { "fr", "###MAGIC-Teleskope###fr.wikipedia.org/wiki/Major_Atmospheric_Gamma-ray_Imaging_Cherenkov_Telescope###" }
+            }),
+          new LinkInfo(
+            "###Gran Telescopio Canarias###de.wikipedia.org/wiki/Gran_Telescopio_Canarias###",
+            new Dictionary<string, string>
+            {
+              { "en", "###Gran Telescopio Canarias###en.wikipedia.org/wiki/Gran_Telescopio_Canarias###" },
+              { "nl", "###Gran Telescopio Canarias###nl.wikipedia.org/wiki/Gran_Telescopio_Canarias###"},
+              { "fr", "###Gran Telescopio Canarias###fr.wikipedia.org/wiki/Gran_Telescopio_Canarias###" }
+            }),
+          new LinkInfo(
+            "###Athos Star Campus~~~athos.org###",  // link via http instead of https
+            new Dictionary<string, string>
+            {
+              { "*", "###Athos Star Campus~~~athos.org###" }
+            }),     };
 
     public static bool MatchesPattern(string inputTxt)
     {

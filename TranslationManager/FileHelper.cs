@@ -1,9 +1,10 @@
-﻿using System;
+﻿using Cli;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Cli;
+using System.Xml.Linq;
 
 namespace TranslationManager
 {
@@ -25,6 +26,8 @@ namespace TranslationManager
       {
         var allFiles = Directory.EnumerateFiles(root, "*.json", SearchOption.AllDirectories).ToList();
         allFiles.RemoveAll(fn => isTranslatedFile(fn));
+        allFiles.RemoveAll(fn => isSvgFile(fn));
+        allFiles.RemoveAll(fn => isCommentFile(fn));
         var processedDirectories = new HashSet<string>();
         var missingTranslations = new List<string>();
         foreach (var origFile in allFiles)
@@ -74,6 +77,17 @@ namespace TranslationManager
             return true;
         }
         return false;
+      }
+
+      bool isSvgFile(string fullName)
+      {
+        var fn = Path.GetFileName(fullName);
+        return fn.ToLower().StartsWith("svg_");
+      }
+
+      bool isCommentFile(string fn)
+      {
+        return fn.ToLower().Contains(".denied.") || fn.ToLower().Contains(".comments.");
       }
     }
 

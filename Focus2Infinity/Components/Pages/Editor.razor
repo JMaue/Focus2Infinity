@@ -21,101 +21,151 @@
 }
 else
 {
-  @* Canvas: edit overlay for Topic/Name *@
-  <div class="d-flex flex-column">
-    <div class="d-flex align-items-center gap-2 flex-wrap mb-2">
-      <a href="@ImageDetailsUrl" class="btn btn-outline-secondary">Back to image</a>
-      <span class="text-muted">@Name</span>
-      <div class="btn-group" role="group">
-        <button type="button" class="btn @(_tool == EditorTool.Line ? "btn-primary" : "btn-outline-primary")" @onclick='() => _tool = EditorTool.Line'>Line</button>
-        <button type="button" class="btn @(_tool == EditorTool.Circle ? "btn-primary" : "btn-outline-primary")" @onclick='() => _tool = EditorTool.Circle'>Circle</button>
-        <button type="button" class="btn @(_tool == EditorTool.Text ? "btn-primary" : "btn-outline-primary")" @onclick='() => _tool = EditorTool.Text'>Text</button>
+  <div class="container-fluid">
+    @* Toolbar *@
+    <div class="row mb-3">
+      <div class="col-12">
+        <div class="d-flex gap-2 flex-wrap align-items-center">
+          <a href="@ImageDetailsUrl" class="btn btn-outline-secondary">Back to image</a>
+          <span class="text-muted">@Name</span>
+          <div class="btn-group" role="group">
+            <button type="button" class="btn @(_tool == EditorTool.Line ? "btn-primary" : "btn-outline-primary")" @onclick='() => _tool = EditorTool.Line'>Line</button>
+            <button type="button" class="btn @(_tool == EditorTool.Circle ? "btn-primary" : "btn-outline-primary")" @onclick='() => _tool = EditorTool.Circle'>Circle</button>
+            <button type="button" class="btn @(_tool == EditorTool.Text ? "btn-primary" : "btn-outline-primary")" @onclick='() => _tool = EditorTool.Text'>Text</button>
+          </div>
+          <label class="d-flex align-items-center gap-1">
+            Color <input type="color" @bind="_strokeColor" class="form-control form-control-color" style="width:2.5rem;height:2.5rem" />
+          </label>
+          <label class="d-flex align-items-center gap-1">
+            Stroke <input type="number" @bind="_strokeWidth" @bind:event="oninput" min="0.5" max="20" step="0.5" class="form-control" style="width:4rem" />
+          </label>
+          <label class="d-flex align-items-center gap-1">
+            Font size <input type="number" @bind="_fontSize" @bind:event="oninput" min="8" max="72" class="form-control" style="width:4rem" />
+          </label>
+          <button class="btn btn-outline-secondary" @onclick="Undo" disabled="@(_undoStack.Count == 0)">Undo</button>
+          <button class="btn btn-success" @onclick="Save">Save</button>
+        </div>
       </div>
-      <label class="d-flex align-items-center gap-1">
-        Color <input type="color" @bind="_strokeColor" class="form-control form-control-color" style="width:2.5rem;height:2.5rem" />
-      </label>
-      <label class="d-flex align-items-center gap-1">
-        Stroke <input type="number" @bind="_strokeWidth" @bind:event="oninput" min="0.5" max="20" step="0.5" class="form-control" style="width:4rem" />
-      </label>
-      <label class="d-flex align-items-center gap-1">
-        Font size <input type="number" @bind="_fontSize" @bind:event="oninput" min="8" max="72" class="form-control" style="width:4rem" />
-      </label>
-      <button class="btn btn-outline-secondary" @onclick="Undo" disabled="@(_undoStack.Count == 0)">Undo</button>
-      <button class="btn btn-success" @onclick="Save">Save</button>
     </div>
 
-    <div class="d-flex flex-grow-1" style="min-height:400px">
-      <div class="position-relative me-3" id="canvas-container" style="max-width:900px;max-height:600px;flex:1;cursor:none"
-           @onmousedown="OnCanvasMouseDown"
-           @onmousemove="OnCanvasMouseMove"
-           @onmouseup="OnCanvasMouseUp"
-           @onmouseleave="OnCanvasMouseLeave">
-        <img id="editor-image" src="@_imageUrl" alt="" style="width:100%;height:100%;object-fit:contain;display:block;pointer-events:none" />
-        @if (_crosshairX.HasValue && _crosshairY.HasValue)
-        {
-          <div class="position-absolute pointer-events-none" style="left:@(_crosshairX.Value)px;top:@(_crosshairY.Value)px;transform:translate(-50%,-50%);width:21px;height:21px;">
-            <svg viewBox="0 0 21 21" style="display:block;filter:drop-shadow(0 0 1px black);">
-              <line x1="0" y1="10" x2="9" y2="10" stroke="white" stroke-width="1" />
-              <line x1="11" y1="10" x2="21" y2="10" stroke="white" stroke-width="1" />
-              <line x1="10" y1="0" x2="10" y2="9" stroke="white" stroke-width="1" />
-              <line x1="10" y1="11" x2="10" y2="21" stroke="white" stroke-width="1" />
-            </svg>
-          </div>
-        }
-        <svg id="overlay-svg" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none">
-          @foreach (var line in _overlay.Lines)
+    @* Canvas and Elements Panel *@
+    <div class="row">
+      <div class="col-lg-9 col-md-8">
+        <div id="canvas-container" 
+             style="position:relative;width:100%;cursor:crosshair;background-color:#1a1a1a;"
+             @onmousedown="OnCanvasMouseDown"
+             @onmousemove="OnCanvasMouseMove"
+             @onmouseup="OnCanvasMouseUp"
+             @onmouseleave="OnCanvasMouseLeave">
+
+          <img id="editor-image" 
+               src="@_imageUrl" 
+               alt="" 
+               style="width:100%;height:auto;display:block;pointer-events:none;" />
+
+          @if (_crosshairX.HasValue && _crosshairY.HasValue)
           {
-            <line x1="@SvgPct(line.X1)" y1="@SvgPct(line.Y1)" x2="@SvgPct(line.X2)" y2="@SvgPct(line.Y2)" stroke="@line.Color" stroke-width="@SvgNum(line.StrokeWidth)" />
+            <div class="position-absolute" 
+                 style="left:@(_crosshairX.Value)px;top:@(_crosshairY.Value)px;transform:translate(-50%,-50%);width:21px;height:21px;pointer-events:none;">
+              <svg viewBox="0 0 21 21" style="display:block;filter:drop-shadow(0 0 1px black);">
+                <line x1="0" y1="10" x2="9" y2="10" stroke="white" stroke-width="1" />
+                <line x1="11" y1="10" x2="21" y2="10" stroke="white" stroke-width="1" />
+                <line x1="10" y1="0" x2="10" y2="9" stroke="white" stroke-width="1" />
+                <line x1="10" y1="11" x2="10" y2="21" stroke="white" stroke-width="1" />
+              </svg>
+            </div>
           }
-          @foreach (var circle in _overlay.Circles)
-          {
-            <circle cx="@SvgPct(circle.Cx)" cy="@SvgPct(circle.Cy)" r="@SvgPct(circle.Radius)" stroke="@circle.Color" stroke-width="2" fill="@(circle.Fill ? circle.Color : "none")" />
-          }
-          @foreach (var text in _overlay.Texts)
-          {
-            @((MarkupString)GetSvgTextHtml(text))
-          }
-          @if (_previewLine.HasValue)
-          {
-            (double X1, double Y1, double X2, double Y2) = _previewLine.Value;
-            <line x1="@SvgPct(X1)" y1="@SvgPct(Y1)" x2="@SvgPct(X2)" y2="@SvgPct(Y2)" stroke="@_strokeColor" stroke-width="2" stroke-dasharray="4,2" />
-          }
-          @if (_previewCircle.HasValue)
-          {
-            (double Cx, double Cy, double Radius) pc = _previewCircle.Value;
-            <circle cx="@SvgPct(pc.Cx)" cy="@SvgPct(pc.Cy)" r="@SvgPct(pc.Radius)" stroke="@_strokeColor" stroke-width="2" fill="none" stroke-dasharray="4,2" />
-          }
-        </svg>
+
+          <svg id="overlay-svg" 
+               style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none">
+            @foreach (var line in _overlay.Lines)
+            {
+              <line x1="@SvgPct(line.X1)" y1="@SvgPct(line.Y1)" 
+                    x2="@SvgPct(line.X2)" y2="@SvgPct(line.Y2)" 
+                    stroke="@line.Color" 
+                    stroke-width="@SvgNum(line.StrokeWidth)" />
+            }
+            @foreach (var circle in _overlay.Circles)
+            {
+              <circle cx="@SvgPct(circle.Cx)" cy="@SvgPct(circle.Cy)" 
+                      r="@SvgPct(circle.Radius)" 
+                      stroke="@circle.Color" 
+                      stroke-width="@SvgNum(circle.StrokeWidth)" 
+                      fill="@(circle.Fill ? circle.Color : "none")" />
+            }
+            @foreach (var text in _overlay.Texts)
+            {
+              @((MarkupString)GetSvgTextHtml(text))
+            }
+            @if (_previewLine.HasValue)
+            {
+              (double X1, double Y1, double X2, double Y2) = _previewLine.Value;
+              <line x1="@SvgPct(X1)" y1="@SvgPct(Y1)" 
+                    x2="@SvgPct(X2)" y2="@SvgPct(Y2)" 
+                    stroke="@_strokeColor" 
+                    stroke-width="2" 
+                    stroke-dasharray="4,2" />
+            }
+            @if (_previewCircle.HasValue)
+            {
+              (double Cx, double Cy, double Radius) pc = _previewCircle.Value;
+              <circle cx="@SvgPct(pc.Cx)" cy="@SvgPct(pc.Cy)" 
+                      r="@SvgPct(pc.Radius)" 
+                      stroke="@_strokeColor" 
+                      stroke-width="2" 
+                      fill="none" 
+                      stroke-dasharray="4,2" />
+            }
+          </svg>
+        </div>
       </div>
 
-      <div class="border-start ps-3" style="min-width:220px">
-        <h6>Elements</h6>
-        <ul class="list-group list-group-flush small">
-          @{ var idx = 0; }
-          @foreach (var line in _overlay.Lines)
-          {
-            var i = idx++;
-            <li class="list-group-item d-flex justify-content-between align-items-center py-1 @(IsSelected("line", i) ? "active" : "")" @onclick='() => SelectElement("line", i)'>
-              Line @(i + 1) <button class="btn btn-sm btn-outline-danger" @onclick='() => DeleteLine(i)' @onclick:stopPropagation>Del</button>
-            </li>
-          }
-          @{ idx = 0; }
-          @foreach (var circle in _overlay.Circles)
-          {
-            var i = idx++;
-            <li class="list-group-item d-flex justify-content-between align-items-center py-1 @(IsSelected("circle", i) ? "active" : "")" @onclick='() => SelectElement("circle", i)'>
-              Circle @(i + 1) <button class="btn btn-sm btn-outline-danger" @onclick='() => DeleteCircle(i)' @onclick:stopPropagation>Del</button>
-            </li>
-          }
-          @{ idx = 0; }
-          @foreach (var text in _overlay.Texts)
-          {
-            var i = idx++;
-            <li class="list-group-item d-flex justify-content-between align-items-center py-1 @(IsSelected("text", i) ? "active" : "")" @onclick='() => SelectElement("text", i)'>
-              Text (@text.Text) <button class="btn btn-sm btn-outline-danger" @onclick='() => DeleteText(i)' @onclick:stopPropagation>Del</button>
-            </li>
-          }
-        </ul>
+      <div class="col-lg-3 col-md-4">
+        <div class="card">
+          <div class="card-header">
+            <h6 class="mb-0">Elements</h6>
+          </div>
+          <div class="card-body p-0">
+            <ul class="list-group list-group-flush small">
+              @{ var idx = 0; }
+              @foreach (var line in _overlay.Lines)
+              {
+                var i = idx++;
+                <li class="list-group-item d-flex justify-content-between align-items-center py-2 @(IsSelected("line", i) ? "active" : "")" 
+                    @onclick='() => SelectElement("line", i)'>
+                  <span>Line @(i + 1)</span>
+                  <button class="btn btn-sm btn-outline-danger ms-2" 
+                          @onclick='() => DeleteLine(i)' 
+                          @onclick:stopPropagation>Del</button>
+                </li>
+              }
+              @{ idx = 0; }
+              @foreach (var circle in _overlay.Circles)
+              {
+                var i = idx++;
+                <li class="list-group-item d-flex justify-content-between align-items-center py-2 @(IsSelected("circle", i) ? "active" : "")" 
+                    @onclick='() => SelectElement("circle", i)'>
+                  <span>Circle @(i + 1)</span>
+                  <button class="btn btn-sm btn-outline-danger ms-2" 
+                          @onclick='() => DeleteCircle(i)' 
+                          @onclick:stopPropagation>Del</button>
+                </li>
+              }
+              @{ idx = 0; }
+              @foreach (var text in _overlay.Texts)
+              {
+                var i = idx++;
+                <li class="list-group-item d-flex justify-content-between align-items-center py-2 @(IsSelected("text", i) ? "active" : "")" 
+                    @onclick='() => SelectElement("text", i)'>
+                  <span class="text-truncate me-2">@text.Text</span>
+                  <button class="btn btn-sm btn-outline-danger flex-shrink-0" 
+                          @onclick='() => DeleteText(i)' 
+                          @onclick:stopPropagation>Del</button>
+                </li>
+              }
+            </ul>
+          </div>
+        </div>
       </div>
     </div>
   </div>

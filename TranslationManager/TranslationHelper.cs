@@ -44,12 +44,20 @@ namespace TranslationManager
       _allTerms["fr"].Add("Am Schliffkopf", "au Schliffkopf");
       _allTerms["fr"].Add("Sturmvogel", "Nébuleuse du Voile");
       _allTerms["fr"].Add("Feuerrad Galaxie", "Galaxie du Moulinet");
+      _allTerms["fr"].Add("Hexenkopfnebel", "La nébuleuse de la Tête de Sorcière");
+      _allTerms["fr"].Add("ATHOS Centro Astronomico, La Palma", "ATHOS Centro Astronomico, La Palma");
+      _allTerms["fr"].Add("Feuerradgalaxie, Messier 101", "Galaxie du Moulinet, Messier 101");
+      _allTerms["fr"].Add("Medusa Nebel, Abell 21", "La nébuleuse de la Méduse, Abell 21");
 
       _allTerms["nl"].Add("Ort", "Locatie");
       _allTerms["nl"].Add("Exposure Settings", "Belichtings instellingen");
       _allTerms["nl"].Add("Herz- und Seele Nebel", "Hart- and Zielnevel");
       _allTerms["nl"].Add("Am Schliffkopf", "op de Schliffkopf");
       _allTerms["nl"].Add("Feuerrad Galaxie", "Windmolenstelsel");
+      _allTerms["nl"].Add("Hexenkopfnebel", "Heksenkopnevel");
+      _allTerms["nl"].Add("ATHOS Centro Astronomico, La Palma", "ATHOS Centro Astronomico, La Palma");
+      _allTerms["nl"].Add("Feuerradgalaxie, Messier 101", "Windmolenstelsel, Messier 101");
+      _allTerms["nl"].Add("Medusa Nebel, Abell 21", "Medusanevel, Abell 21");
 
       _allTerms["en"].Add("Ort", "Location");
       _allTerms["en"].Add("Herz- und Seele Nebel", "Heart- and Soul nebula");
@@ -57,6 +65,10 @@ namespace TranslationManager
       _allTerms["en"].Add("Erdbeermond", "Strawberry Moon");
       _allTerms["en"].Add("Feuerrad Galaxie", "Pinwheel Galaxy");
       _allTerms["en"].Add("Am Schliffkopf", "At the Schliffkopf");
+      _allTerms["en"].Add("Hexenkopfnebel", "Witchhead Nebula");
+      _allTerms["en"].Add("ATHOS Centro Astronomico, La Palma", "ATHOS Centro Astronomico, La Palma");
+      _allTerms["en"].Add("Feuerradgalaxie, Messier 101", "Pinwheel, Messier 101");
+      _allTerms["en"].Add("Medusa Nebel, Abell 21", "Medusa Nebula, Abell 21");
     } 
 
     public static void ShowTranslatePage()

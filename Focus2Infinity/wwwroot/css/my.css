@@ -28,23 +28,3 @@ body {
   width: 250px;
   height: 200px;
 }
-
-.svg-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 10;
-  will-change: opacity;
-  transition: opacity 0.7s ease-in-out;
-}
-
-.svg-overlay-hidden {
-  opacity: 0;
-}
-
-.svg-overlay-visible {
-  opacity: 1;
-}

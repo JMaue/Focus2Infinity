@@ -19,7 +19,7 @@ namespace Focus2Infinity.Data
     public async Task<List<string>> GetMainTopics()
     {
       var rc = new List<string>();
-      await Task.Run(() => { rc.AddRange(new string[] { "Galaxies", "Nebulae", "Clusters", "Planets", "Eclipses", "Milkyway", "Moon", "Sun", "Sunsets", "Comets", "Landscapes", "StarTrails", "Others" }); });
+      await Task.Run(() => { rc.AddRange(new string[] { "Galaxies", "Nebulae", "Clusters", "Eclipses", "Milkyway", "Moon", "Sun", "Sunsets", "Comets", "Landscapes", "StarTrails", "Others" }); });
       return rc;
     }
 
@@ -285,7 +285,6 @@ namespace Focus2Infinity.Data
     {
       // <a href="https://www.abenteuer-sterne.de" target="_blank">Abenteuer-Sterne</a>      
       string pattern1 = @"###(.*?)###(.*?)###";
-
       if (Regex.IsMatch(input, pattern1))
       {
         string replacement1 = "<a target='_blank' href=https://$2><span style='color:azure; font-weight:bold; text-decoration: none;'>$1</span></a>";
@@ -294,12 +293,22 @@ namespace Focus2Infinity.Data
         return result1;
       }
 
-      // https://de.wikipedia.org/wiki/Deneb
-      string pattern2 = @"##(.*?)##";
-      string replacement2 = "<a target='_blank' href=https://$1><span style='color:azure; font-weight:bold; text-decoration: none;'>$1</span></a>";
+      // link via http insted of https
+      string pattern2 = @"###(.*?)~~~(.*?)###";
+      if (Regex.IsMatch(input, pattern2))
+      {
+        string replacement2 = "<a target='_blank' href=http://$2><span style='color:azure; font-weight:bold; text-decoration: none;'>$1</span></a>";
 
-      string result2 = Regex.Replace(input, pattern2, replacement2);
-      return result2;
+        string result2 = Regex.Replace(input, pattern2, replacement2);
+        return result2;
+      }
+
+      // https://de.wikipedia.org/wiki/Deneb
+      string pattern3 = @"##(.*?)##";
+      string replacement3 = "<a target='_blank' href=https://$1><span style='color:azure; font-weight:bold; text-decoration: none;'>$1</span></a>";
+
+      string result3 = Regex.Replace(input, pattern3, replacement3);
+      return result3;
 
     }
 
