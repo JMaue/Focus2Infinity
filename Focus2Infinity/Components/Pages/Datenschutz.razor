@@ -1,0 +1,36 @@
+@page "/datenschutz"
+@using Focus2Infinity.Services
+@inject ILegalContentService LegalContentService
+@inject IStringLocalizer<SharedResource> L
+
+@rendermode InteractiveServer
+
+<div class="container my-5">
+  <h2>@L["Datenschutz"]</h2>
+  
+  @if (string.IsNullOrEmpty(_content))
+  {
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">@L["Loading"]</span>
+    </div>
+  }
+  else
+  {
+    <div class="mt-4">
+      @((MarkupString)_content)
+    </div>
+  }
+  
+  <div class="mt-5">
+    <a href="/" class="btn btn-primary">@L["Back to Home"]</a>
+  </div>
+</div>
+
+@code {
+  private string _content = string.Empty;
+
+  protected override async Task OnInitializedAsync()
+  {
+    _content = await LegalContentService.GetDatenschutzContent();
+  }
+}

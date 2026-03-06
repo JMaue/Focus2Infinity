@@ -204,4 +204,11 @@
   <data name="CookieMsg" xml:space="preserve">
     <value>We use cookies to store your language preference. By clicking 'Accept', you consent to our use of cookies, otherwise the language shown is derived from your browser settings.</value>
   </data>
+  <data name="Datenschutz" xml:space="preserve">
+    <value>Datenschutz</value>
+    <comment>Datenschutz</comment>
+  </data>
+  <data name="Impressum" xml:space="preserve">
+    <value>Legal notice</value>
+  </data>
 </root>

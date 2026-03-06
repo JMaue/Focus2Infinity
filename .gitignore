@@ -3,6 +3,10 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
+# my own files
+key
+account
+
 # User-specific files
 *.rsuser
 *.suo
@@ -364,3 +368,6 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# Exclude legal content files (contain personal information)
+Focus2Infinity/LegalContent/*.html

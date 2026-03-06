@@ -204,4 +204,10 @@
   <data name="CookieMsg" xml:space="preserve">
     <value>We gebruiken cookies om uw taalvoorkeur op te slaan. Door op ‘Accepteren’ te klikken, stemt u in met ons gebruik van cookies. Als u dit niet doet, wordt de taal weergegeven op basis van uw browserinstellingen.</value>
   </data>
+  <data name="Datenschutz" xml:space="preserve">
+    <value>Privacy Policy</value>
+  </data>
+  <data name="Impressum" xml:space="preserve">
+    <value>Legal notice</value>
+  </data>
 </root>

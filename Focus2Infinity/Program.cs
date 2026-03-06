@@ -97,7 +97,8 @@ try
     // Add services to the container.
     builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
     builder.Services.Configure<OverlayEditorOptions>(builder.Configuration.GetSection(OverlayEditorOptions.SectionName));
-
+    builder.Services.AddSingleton<ILegalContentService, LegalContentService>();
+    
     // Persist Data Protection keys so antiforgery tokens work across restarts/redeploys (avoids "key was not found in the key ring")
     var keyPath = builder.Configuration["DataProtection:KeyPath"];
     var dir = string.IsNullOrEmpty(keyPath)
