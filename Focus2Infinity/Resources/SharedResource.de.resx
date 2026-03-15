@@ -210,4 +210,7 @@
   <data name="Impressum" xml:space="preserve">
     <value>Impressum</value>
   </data>
+  <data name="About Me" xml:space="preserve">
+    <value>über mich</value>
+  </data>
 </root>

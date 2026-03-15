@@ -1,0 +1,71 @@
+﻿@page "/aboutme"
+@inject IStringLocalizer<SharedResource> L
+
+<div class="container my-5">
+  <h2>@L["About Me"]</h2>
+  
+  <div class="row">
+  <div class="col-6 col-sm-4 col-lg-2">
+    <img src="aboutMe.jpg" alt="Image" style="max-width: 100%; height: auto; object-fit: contain; display: block;" />    
+  </div>
+  <div class="mt-4 col-6 col-sm-8 col-lg-10">
+    <p>
+      Seit fast 40 Jahren ist die Fotografie ein Hobby. 
+      <br />
+      Es begann mit einer Praktika aus dem Hause Pentacon in Dresden, 
+      mit Schraubgewinde. Ein 200mm Zoomobjektiv hatte ich mir zusätzlich noch geleistet, die damals schon verfügbaren 
+      Zoom Objektive waren für mich unerschwinglich. 
+      <br /> <br />
+      Das Fotografieren im Dunkeln, bei wenig Licht, vorzugsweise am 
+      Sternenhimmel hat mich vor 5 Jahren wie eine neue Leidenschaft gepackt. Sowohl mit dem offenblendigen 
+      Weitwinkelobjektiv als auch mit Teleskopen versuche ich, vieles festzuhalten, was dem flüchtigen Auge entgeht 
+      oder sowieso ganz verborgen bleiben würde.
+    </p>
+    </div>
+    <h4 class="mt-4">Anregung und Inspiration</h4>
+    <p>Inspiration gefunden habe ich dabei beispielsweise hier:</p>
+
+    <ul class="list-unstyled">
+      <li class="mb-2">
+        <a href="https://nacht-lichter.de/" target="_blank" rel="noopener" class="text-white">
+          <i class="fas fa-external-link-alt me-2"></i>nacht-lichter.de
+        </a>
+      </li>
+      <li class="mb-2">
+        <a href="https://www.astromarso.com/" target="_blank" rel="noopener" class="text-white">
+          <i class="fas fa-external-link-alt me-2"></i>astromarso.com
+        </a>
+      </li>
+      <li class="mb-2">
+        <a href="https://www.astro-fotografie.at/" target="_blank" rel="noopener" class="text-white">
+          <i class="fas fa-external-link-alt me-2"></i>astro-fotografie.at
+        </a>
+      </li>
+      <li class="mb-2">
+        <a href="https://www.nebulaphotos.com/" target="_blank" rel="noopener" class="text-white">
+          <i class="fas fa-external-link-alt me-2"></i>nebulaphotos.com
+        </a>
+      </li>
+      <li class="mb-2">
+        <a href="https://www.skytrip.de/" target="_blank" rel="noopener" class="text-white">
+          <i class="fas fa-external-link-alt me-2"></i>skytrip.de
+        </a>
+      </li>
+    </ul>
+ 
+    <h4 class="mt-4">Software</h4>
+    <p>
+      Da mich auch die Möglichkeiten der modernen KI unterstützten Softwareentwicklung faszinieren, nutze ich diese Webseite um beides zu verbinden:
+      * Die Kommentarfunktion bietet die Möglichkeit, Bilder zu kommentieren und mit mir in Kontakt zu treten. Dabei wird eine KI-basierte Moderationsfunktion (Anthropic Claude API) verwendet, um unangemessene Kommentare zu filtern und die Diskussionen auf der Seite positiv und konstruktiv zu gestalten.
+      * Mit Hilfe eines KI generierten Editors werden Bilder mit SVG Grafiken überlagert, um Orientierungshilfen zu geben.
+      * Die Hilfe von deep.com wurden verwendet, um automatische Übersetzungen in englische, französische und niederländische Sprache durchzuführen.
+
+      Diese Webseite ist erstellt mit C#, .net10 und Blazor.
+    </p>
+  </div>
+
+  <div class="mt-5">
+    <a href="/" class="btn btn-primary">@L["Back to Home"]</a>
+  </div>
+</div>
+
