@@ -4,8 +4,9 @@ namespace Focus2Infinity.Services
 {
   public interface ILegalContentService
   {
-    Task<string> GetImpressumContent();
-    Task<string> GetDatenschutzContent();
+    Task<string> GetLegalNotice();
+    Task<string> GetPrivacyPolicy();
+    Task<string> GetAboutMeContent();
   }
 
   public class LegalContentService : ILegalContentService
@@ -19,14 +20,19 @@ namespace Focus2Infinity.Services
       _contentPath = Path.Combine(AppContext.BaseDirectory, "LegalContent");
     }
 
-    public async Task<string> GetImpressumContent()
+    public async Task<string> GetLegalNotice()
     {
       return await ReadContentFile("impressum");
     }
 
-    public async Task<string> GetDatenschutzContent()
+    public async Task<string> GetPrivacyPolicy()
     {
       return await ReadContentFile("datenschutz");
+    }
+
+    public async Task<string> GetAboutMeContent()
+    {
+      return await ReadContentFile("aboutMe");
     }
 
     private async Task<string> ReadContentFile(string filename)

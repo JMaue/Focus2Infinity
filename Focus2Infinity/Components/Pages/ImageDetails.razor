@@ -15,7 +15,11 @@
 
 @if (_headline != null)
 {
-  <h3 class="text-center my-5">@_headline</h3>
+  <div class="d-flex justify-content-left">
+    <h3> <NavLink class="menu-button text-nowrap text-decoration-none" href="/aboutMe"> @left </NavLink> </h3>
+    <h3 class="text-center mb-0 flex-grow-1 mx-2">@_headline</h3>
+    <h3> <NavLink class="menu-button text-nowrap text-decoration-none" href="/aboutMe"> @right </NavLink> </h3>  
+  </div>
   <div class="row align-items-start">
     <div class="@ColSizeImg" style="position: relative; flex-shrink: 0; flex-grow: 0; align-self: flex-start;" @onmouseover="ShowOverlayImage" @onmouseout="HideOverlayImage">
       <div style="position: relative; display: inline-block; width: fit-content;">
@@ -48,6 +52,10 @@ else
 }
 
 @code {
+
+  const string left = " < ";
+  const string right = " > ";
+
   [Parameter]
   public string Topic { get; set; }
   [Parameter]

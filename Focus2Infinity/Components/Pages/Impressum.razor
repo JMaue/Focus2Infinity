@@ -31,6 +31,6 @@
 
   protected override async Task OnInitializedAsync()
   {
-    _content = await LegalContentService.GetImpressumContent();
+    _content = await LegalContentService.GetLegalNotice();
   }
 }
