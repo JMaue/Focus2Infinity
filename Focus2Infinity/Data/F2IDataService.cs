@@ -76,7 +76,8 @@ namespace Focus2Infinity.Data
                                                file.Extension.Equals(".png", StringComparison.OrdinalIgnoreCase) ||
                                                file.Extension.Equals(".tif", StringComparison.OrdinalIgnoreCase))
                                                && !file.Name.StartsWith("tbn_")
-                                               && !file.Name.StartsWith("ovl_"));
+                                               && !file.Name.StartsWith("ovl_")
+                                               && !file.Name.StartsWith("full_"));
       return rc;
     }
 
@@ -105,6 +106,27 @@ namespace Focus2Infinity.Data
 
 
       return rc;
+    }
+
+    public async Task<(string, string)> GetPreviosNextReferences (string topic, string name, string context, IStringLocalizer<SharedResource> localizer)
+    {
+      List<(string, string)> items;
+      if (context == "all")
+      {
+        var imageItems = await GetAllTopics(localizer);
+        items = imageItems.Select(ii => (ii.Topic, ii.Src)).ToList();
+      }
+      else
+      {
+        var imageItems = await GetSubTopicsSorted(topic, localizer);
+        items = imageItems.Select(ii => (topic, ii)).ToList();
+      }
+
+      var idx = items.FindIndex(item => item.Item1 == topic && item.Item2 == name);
+      var prev = idx > 0 ? items[idx - 1] : items[items.Count-1];
+      var next = idx < items.Count - 1 ? items[idx + 1] : items[0];
+
+      return ($"/imagedetails/{prev.Item1}/{prev.Item2}", $"/imagedetails/{next.Item1}/{next.Item2}");
     }
 
     public async Task<ImageStory> GetStoryText(string topic, string src)

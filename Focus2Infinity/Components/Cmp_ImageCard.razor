@@ -16,9 +16,12 @@
   [Parameter]
   public string Src { get; set; }
 
+  [Parameter]
+  public string Context { get; set; } = "all";
+
   string ImgFile => Path.Combine("img", Topic, Src);
   string ImgTbn => Path.Combine("img", Topic, $"Tbn_{Src}");
-  string details => $"/imagedetails/{Topic}/{Src}";
+  string details => $"/imagedetails/{Topic}/{Src}/{Context}";
 }
 
 

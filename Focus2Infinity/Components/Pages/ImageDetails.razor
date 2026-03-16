@@ -1,5 +1,6 @@
 @page "/imagedetails"
 @page "/imagedetails/{Topic}/{Name}"
+@page "/imagedetails/{Topic}/{Name}/{Context}"
 
 @using System.Web
 @using Focus2Infinity.Data
@@ -16,9 +17,9 @@
 @if (_headline != null)
 {
   <div class="d-flex justify-content-left">
-    <h3> <NavLink class="menu-button text-nowrap text-decoration-none" href="/aboutMe"> @left </NavLink> </h3>
+    <h3 class="ms-3"> <NavLink class="menu-button text-nowrap text-decoration-none" href="@_refPrevious"> @left </NavLink> </h3>
     <h3 class="text-center mb-0 flex-grow-1 mx-2">@_headline</h3>
-    <h3> <NavLink class="menu-button text-nowrap text-decoration-none" href="/aboutMe"> @right </NavLink> </h3>  
+    <h3 class="me-3"> <NavLink class="menu-button text-nowrap text-decoration-none" href="@_refNext"> @right </NavLink> </h3>  
   </div>
   <div class="row align-items-start">
     <div class="@ColSizeImg" style="position: relative; flex-shrink: 0; flex-grow: 0; align-self: flex-start;" @onmouseover="ShowOverlayImage" @onmouseout="HideOverlayImage">
@@ -54,12 +55,16 @@ else
 @code {
 
   const string left = " < ";
+  string _refPrevious = "";
   const string right = " > ";
+  string _refNext = "";
 
   [Parameter]
   public string Topic { get; set; }
   [Parameter]
   public string Name { get; set; }
+  [Parameter]
+  public string Context { get; set; } = "all";
 
   private string ImgFile => $"img/{Topic}/{Name}";
   private string OverlayImgFile => $"img/{Topic}/ovl_{Name}";
@@ -87,6 +92,8 @@ else
     _overlayData = await f2iDataService.GetOverlayData(Topic, Name);
 
     _headline = src.GetHeadline ();
+
+    (_refPrevious, _refNext) = await f2iDataService.GetPreviosNextReferences(Topic, Name, Context, L);
   }
 
   private void ShowOverlayImage(MouseEventArgs args) => _showOverlay = true;
