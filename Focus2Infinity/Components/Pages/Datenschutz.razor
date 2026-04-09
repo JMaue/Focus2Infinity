@@ -29,8 +29,12 @@
 @code {
   private string _content = string.Empty;
 
-  protected override async Task OnInitializedAsync()
+  protected override async Task OnAfterRenderAsync(bool firstRender)
   {
-    _content = await LegalContentService.GetPrivacyPolicy();
+    if (firstRender)
+    {
+      _content = await LegalContentService.GetPrivacyPolicy();
+      StateHasChanged();
+    }
   }
 }
