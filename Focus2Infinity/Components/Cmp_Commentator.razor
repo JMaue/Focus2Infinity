@@ -3,7 +3,7 @@
 @inject IJSRuntime JSRuntime
 
 @inject IStringLocalizer<SharedResource> L
-@inject F2IDataService f2iDataService
+@inject CommentService commentService
 @inject IEMailService f2iEmailService
 @inject ICommentValidationService f2iCommentValidationService
 
@@ -95,7 +95,7 @@
 
   protected override async Task OnInitializedAsync()
   {
-    comments = await f2iDataService.GetCommentHistory(Topic, Src);
+    comments = await commentService.GetCommentHistory(Topic, Src);
   }
 
   private void ToggleConversation()
@@ -136,7 +136,7 @@
       await f2iEmailService.SendAsync("j.mauersberger@focustoinfinity.eu", about, content);
 
       // store comment
-      await f2iDataService.AddComment(Topic, Src, commentItem, isValid);
+      await commentService.AddComment(Topic, Src, commentItem, isValid);
 
       // start fresh
       commentModel = new CommentModel();

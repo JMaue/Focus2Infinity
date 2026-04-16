@@ -1,8 +1,9 @@
 ﻿@page "/"
 @using Focus2Infinity.Data
+@using Focus2Infinity.Services
 @using Focus2Infinity
 @using Microsoft.Extensions.Localization
-@inject F2IDataService f2iDataService
+@inject ImageCatalogService imageCatalogService
 @inject IStringLocalizer<SharedResource> L
 
 <PageTitle>@L["Home"]</PageTitle>
@@ -39,7 +40,7 @@ else
 
   protected override async Task OnInitializedAsync()
   {
-    images = await f2iDataService.GetAllTopics(L);
+    images = await imageCatalogService.GetAllTopics(L);
 
     await base.OnInitializedAsync();
   }

@@ -1,6 +1,7 @@
 ﻿@using Focus2Infinity.Data
+@using Focus2Infinity.Services
 @using Focus2Infinity
-@inject F2IDataService f2iDataService
+@inject ImageMetadataService imageMetadataService
 
 @if (_source != null)
 {
@@ -23,10 +24,10 @@ else
   private string Headline => _source?.GetHeadline ();
   string details => $"/imagedetails/{Topic}/{Src}";
 
-  private string Unwrap(string value) => f2iDataService.Unwrap(value);
+  private string Unwrap(string value) => imageMetadataService.Unwrap(value);
 
   protected override async Task OnInitializedAsync()
   {
-    _source = await f2iDataService.GetStoryText(Topic, Src);
+    _source = await imageMetadataService.GetStoryText(Topic, Src);
   }
 }

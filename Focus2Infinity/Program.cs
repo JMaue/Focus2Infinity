@@ -109,7 +109,11 @@ try
         .PersistKeysToFileSystem(new DirectoryInfo(dir));
 
     builder.Services.AddRazorComponents().AddInteractiveServerComponents();
-    builder.Services.AddSingleton<F2IDataService>();
+    builder.Services.AddSingleton<ImagePathResolver>();
+    builder.Services.AddSingleton<ImageMetadataService>();
+    builder.Services.AddSingleton<ImageCatalogService>();
+    builder.Services.AddSingleton<OverlayService>();
+    builder.Services.AddSingleton<CommentService>();
     builder.Services.AddSingleton<ICommentValidationService>(sp =>
     {
       var logger = sp.GetRequiredService<ILogger<CommentValidationService>>();

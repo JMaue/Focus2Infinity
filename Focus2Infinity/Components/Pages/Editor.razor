@@ -1,12 +1,14 @@
 @page "/editor/{Topic}/{Name}"
 @using Focus2Infinity.Data
+@using Focus2Infinity.Services
 @using Focus2Infinity
 @using Focus2Infinity.Options
 @using Microsoft.Extensions.Options
 @using System.Globalization
 @using System.Text.Json
 @using System.Net
-@inject F2IDataService f2iDataService
+@inject ImageCatalogService imageCatalogService
+@inject OverlayService overlayService
 @inject IStringLocalizer<SharedResource> L
 @inject NavigationManager Navigation
 @inject IJSRuntime JS
@@ -204,10 +206,10 @@ else
 
   protected override async Task OnInitializedAsync()
   {
-    _topics = await f2iDataService.GetMainTopics();
+    _topics = await imageCatalogService.GetMainTopics();
     if (_isCanvasMode)
     {
-      var loaded = await f2iDataService.GetOverlayData(Topic!, Name!);
+      var loaded = await overlayService.GetOverlayData(Topic!, Name!);
       if (loaded != null) _overlay = loaded;
     }
   }
@@ -394,10 +396,10 @@ else
     StateHasChanged();
   }
 
-  private void Save()
+  private async Task Save()
   {
     if (!_isCanvasMode) return;
-    f2iDataService.SaveOverlayData(Topic!, Name!, _overlay);
+    await overlayService.SaveOverlayData(Topic!, Name!, _overlay);
     StateHasChanged();
   }
 

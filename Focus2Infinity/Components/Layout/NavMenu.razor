@@ -1,8 +1,8 @@
-@using Focus2Infinity.Data
+@using Focus2Infinity.Services
 @using Focus2Infinity
 @using Focus2Infinity.Options
 @using Microsoft.Extensions.Options
-@inject F2IDataService f2iDataService
+@inject ImageCatalogService imageCatalogService
 @inject IStringLocalizer<SharedResource> L
 @inject IOptions<OverlayEditorOptions> OverlayEditorOptions
 
@@ -53,7 +53,7 @@
 
   protected override async Task OnInitializedAsync()
   {
-    var topics = await f2iDataService.GetMainTopics();
+    var topics = await imageCatalogService.GetMainTopics();
     foreach (var topic in topics)
     {
       var c1 = Thread.CurrentThread.CurrentCulture;

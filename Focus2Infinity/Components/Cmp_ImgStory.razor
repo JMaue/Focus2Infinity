@@ -1,5 +1,5 @@
-﻿@using Focus2Infinity.Data
-@inject F2IDataService f2iDataService
+﻿@using Focus2Infinity.Services
+@inject OverlayService overlayService
 
 <div class="col-12 col-sm-6 d-flex flex-row justify-content-center">
   <Cmp_ImageCard Topic=@Topic Src=@Name Context=@Topic/>
@@ -20,6 +20,6 @@
 
   protected override async Task OnInitializedAsync()
   {
-    _hasOverlayImg = await f2iDataService.OverlayExists(Topic, Name);
+    _hasOverlayImg = await overlayService.OverlayExists(Topic, Name);
   }
 }

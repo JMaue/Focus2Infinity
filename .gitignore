@@ -348,6 +348,14 @@ ASALocalRun/
 # MSBuild Binary and Structured Log
 *.binlog
 
+# SpecKit — reinstallable via `specify init --here`
+.github/agents/speckit.*.agent.md
+.github/prompts/speckit.*.prompt.md
+.specify/templates/
+.specify/extensions/
+.specify/scripts/
+.specify/integrations/
+
 # NVidia Nsight GPU debugger configuration file
 *.nvuser
 

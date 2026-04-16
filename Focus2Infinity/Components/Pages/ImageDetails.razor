@@ -4,11 +4,14 @@
 
 @using System.Web
 @using Focus2Infinity.Data
+@using Focus2Infinity.Services
 @using Focus2Infinity
 @using Focus2Infinity.Options
 @using Microsoft.Extensions.Localization
 @using Microsoft.Extensions.Options
-@inject F2IDataService f2iDataService
+@inject ImageCatalogService imageCatalogService
+@inject ImageMetadataService imageMetadataService
+@inject OverlayService overlayService
 @inject IStringLocalizer<SharedResource> L
 @inject IOptions<OverlayEditorOptions> OverlayEditorOptions
 
@@ -83,17 +86,17 @@ else
 
   protected override async Task OnInitializedAsync()
   {
-    var src = await f2iDataService.GetStoryText(Topic, Name);
+    var src = await imageMetadataService.GetStoryText(Topic, Name);
 
-    (int width, int heigth) = await f2iDataService.GetImageFormat(Topic, Name);
+    (int width, int heigth) = await imageMetadataService.GetImageFormat(Topic, Name);
     _portrait = width < heigth;
 
-    _hasOverlayImg = await f2iDataService.OverlayExists(Topic, Name);
-    _overlayData = await f2iDataService.GetOverlayData(Topic, Name);
+    _hasOverlayImg = await overlayService.OverlayExists(Topic, Name);
+    _overlayData = await overlayService.GetOverlayData(Topic, Name);
 
     _headline = src.GetHeadline ();
 
-    (_refPrevious, _refNext) = await f2iDataService.GetPreviosNextReferences(Topic, Name, Context, L);
+    (_refPrevious, _refNext) = await imageCatalogService.GetPreviosNextReferences(Topic, Name, Context, L);
   }
 
   private void ShowOverlayImage(MouseEventArgs args) => _showOverlay = true;
