@@ -166,7 +166,16 @@ namespace TranslationManager
             new Dictionary<string, string>
             {
               { "*", "###Athos Star Campus~~~athos.org###" }
-            }),     };
+            }),   
+          new LinkInfo(
+            "###Ringnebel###de.wikipedia.org/wiki/Ringnebel###",  // link via https instead of http
+            new Dictionary<string, string>
+            {
+              { "en", "###Ring Nebula###en.wikipedia.org/wiki/Ring_Nebula###" },
+              { "nl", "###The Ring Nevel###nl.wikipedia.org/wiki/Ringnevel###" },
+              { "fr", "###Nebuleuse de la Lyre###fr.wikipedia.org/wiki/N%C3%A9buleuse_de_la_Lyre###" }
+            })
+    };
 
     public static bool MatchesPattern(string inputTxt)
     {

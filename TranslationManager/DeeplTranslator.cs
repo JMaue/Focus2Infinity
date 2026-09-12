@@ -42,12 +42,12 @@ namespace TranslationManager
 
       using var content = new FormUrlEncodedContent(new[]
       {
-      new KeyValuePair<string, string>("text", text),
-      new KeyValuePair<string, string>("target_lang", targetLang),
-      // Optional: uncomment to force a source language
-      // new KeyValuePair<string, string>("source_lang", sourceLang ?? string.Empty),
-      new KeyValuePair<string, string>("preserve_formatting", "1")
-    }.Where(kv => !string.IsNullOrEmpty(kv.Value)));
+        new KeyValuePair<string, string>("text", text),
+        new KeyValuePair<string, string>("target_lang", targetLang),
+        // Optional: uncomment to force a source language
+        // new KeyValuePair<string, string>("source_lang", sourceLang ?? string.Empty),
+        new KeyValuePair<string, string>("preserve_formatting", "1")
+      }.Where(kv => !string.IsNullOrEmpty(kv.Value)));
 
       using var response = await _http.PostAsync(ApiUri, content, ct).ConfigureAwait(false);
       var payload = await response.Content.ReadAsStringAsync(ct).ConfigureAwait(false);

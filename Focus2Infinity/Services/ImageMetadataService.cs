@@ -40,7 +40,7 @@ namespace Focus2Infinity.Services
 
     public string Unwrap(string input)
     {
-      string pattern1 = @"###(.*?)###(.*?)###";
+      string pattern1 = @"###(.*?)###(.*?)###"; // Pattern to match ###text###url### for https links
       if (Regex.IsMatch(input, pattern1))
       {
         string replacement1 = "<a target='_blank' href=https://$2><span style='color:azure; font-weight:bold; text-decoration: none;'>$1</span></a>";
@@ -48,7 +48,7 @@ namespace Focus2Infinity.Services
         return result1;
       }
 
-      string pattern2 = @"###(.*?)~~~(.*?)###";
+      string pattern2 = @"###(.*?)~~~(.*?)###"; // Pattern to match ###text~~~url### for http links
       if (Regex.IsMatch(input, pattern2))
       {
         string replacement2 = "<a target='_blank' href=http://$2><span style='color:azure; font-weight:bold; text-decoration: none;'>$1</span></a>";
@@ -56,10 +56,18 @@ namespace Focus2Infinity.Services
         return result2;
       }
 
-      string pattern3 = @"##(.*?)##";
-      string replacement3 = "<a target='_blank' href=https://$1><span style='color:azure; font-weight:bold; text-decoration: none;'>$1</span></a>";
-      string result3 = Regex.Replace(input, pattern3, replacement3);
-      return result3;
+      string pattern3 = @"##(.*?)##"; // Pattern to match ##url## for https links
+      if (Regex.IsMatch(input, pattern3))
+      {
+        string replacement3 = "<a target='_blank' href=https://$1><span style='color:azure; font-weight:bold; text-decoration: none;'>$1</span></a>";
+        string result3 = Regex.Replace(input, pattern3, replacement3);
+        return result3;
+      }
+      string pattern4 = @"~~~(.*?)~~~(.*?)~~~"; // Pattern to match ~~~text~~~url~~~ for relative local links
+      string replacement4 = "<a href=./$1><span style='color:azure; font-weight:bold; text-decoration: none;'>$2</span></a>";
+      string result4 = Regex.Replace(input, pattern4, replacement4);
+      return result4;
+
     }
 
     private (int width, int height) DoGetImageFormat(string topic, string src)

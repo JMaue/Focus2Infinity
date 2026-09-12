@@ -48,6 +48,7 @@ namespace TranslationManager
       _allTerms["fr"].Add("ATHOS Centro Astronomico, La Palma", "ATHOS Centro Astronomico, La Palma");
       _allTerms["fr"].Add("Feuerradgalaxie, Messier 101", "Galaxie du Moulinet, Messier 101");
       _allTerms["fr"].Add("Medusa Nebel, Abell 21", "La nébuleuse de la Méduse, Abell 21");
+      _allTerms["fr"].Add("Ringnebel", "Nébuleuse de la Lyre");
 
       _allTerms["nl"].Add("Ort", "Locatie");
       _allTerms["nl"].Add("Exposure Settings", "Belichtings instellingen");
@@ -109,12 +110,6 @@ namespace TranslationManager
 
       string[] languages = language.Length > 0 ? new string[] { language } : new string[] { "fr", "nl", "en" };
 
-      var allTerms = new Dictionary<string, Dictionary<string, string>>(StringComparer.Ordinal);
-      foreach (var lang in languages)
-      {
-        allTerms[lang] = new Dictionary<string, string>(StringComparer.Ordinal);
-      }
-
       var allFiles = Directory.EnumerateFiles(rootPath, "*.json", SearchOption.AllDirectories).ToList();
       foreach (var file in allFiles)
       {
@@ -138,14 +133,6 @@ namespace TranslationManager
           Console.Error.WriteLine($"Skipped invalid JSON: {file} ({ex.Message})");
           Console.ReadLine();
         }
-      }
-
-      // save the whole vocabulary
-      foreach (var lang in languages)
-      {
-        var translatedJson = JsonSerializer.Serialize(allTerms[lang], new JsonSerializerOptions { WriteIndented = true });
-        var translatedfile = Path.Combine(rootPath, $"AllTerms.{lang}.json");
-        File.WriteAllText(translatedfile, translatedJson);
       }
 
       Console.WriteLine($"Scanned {totalNumberOfFiles} JSON file(s) under: {rootPath}");
