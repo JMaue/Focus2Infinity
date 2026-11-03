@@ -22,7 +22,7 @@ namespace Focus2Infinity.Services
     // Sends an email via SMTP using .NET 8 compatible APIs
     public async Task SendAsync(string from, string subject, string htmlBody, CancellationToken ct = default)
     {
-      const int smtpPort = 25;
+      const int smtpPort = 587;
       const bool enableSsl = true;
       const int timeoutSeconds = 10;
 

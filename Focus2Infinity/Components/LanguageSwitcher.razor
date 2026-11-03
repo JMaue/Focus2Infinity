@@ -2,6 +2,7 @@
 @inject NavigationManager Nav
 @inject IJSRuntime JSRuntime
 @inject IStringLocalizer<SharedResource> L
+@inject ILogger<LanguageSwitcher> Logger
 
 @rendermode InteractiveServer
 
@@ -60,9 +61,12 @@ else
 
   protected override async Task OnAfterRenderAsync(bool firstRender)
   {
+    Logger.LogInformation("LanguageSwitcher OnAfterRenderAsync called. FirstRender: {FirstRender}", firstRender);
     if (firstRender)
     {
+      Logger.LogInformation("LanguageSwitcher invoking CheckCookieConsent");
       hasConsent = await CheckCookieConsent();
+      Logger.LogInformation("LanguageSwitcher consent result: {HasConsent}", hasConsent);
       StateHasChanged();
     }
   }
@@ -70,6 +74,7 @@ else
   private async Task OnCultureChanged()
   {
     var culture = selectedLanguage;
+    Logger.LogInformation($"OnCultureChanged called. Culture: {culture}, HasConsent: {hasConsent}, Uri: {Nav.Uri}");
     var uri = new Uri(Nav.Uri);
     
     // Build the target URL with culture query parameters
@@ -85,8 +90,9 @@ else
       
       // Store in sessionStorage for immediate use
       await JSRuntime.InvokeVoidAsync("sessionStorage.setItem", "selectedLanguage", culture);
-      
+
       // Navigate without query parameters (cookie will be used)
+      Logger.LogInformation($"Navigating with cookie to {uri.PathAndQuery}");
       Nav.NavigateTo(uri.PathAndQuery, forceLoad: true);
     }
     else
@@ -96,6 +102,7 @@ else
       await JSRuntime.InvokeVoidAsync("sessionStorage.setItem", "selectedLanguage", culture);
       
       // Navigate with query parameters (transient language)
+      Logger.LogWarning($"OnCultureChanged without consent. Navigating to {uriBuilder.Uri.PathAndQuery}");
       Nav.NavigateTo(uriBuilder.Uri.PathAndQuery, forceLoad: true);
     }
   }
@@ -106,6 +113,7 @@ else
     {
       // First check sessionStorage (current session)
       var sessionConsent = await JSRuntime.InvokeAsync<string>("sessionStorage.getItem", "cookieConsent");
+      Logger.LogInformation("CheckCookieConsent sessionStorage value: '{SessionConsent}'", sessionConsent);
       if (!string.IsNullOrEmpty(sessionConsent))
       {
         return sessionConsent == "accepted";
@@ -115,10 +123,12 @@ else
       var cookieConsent = await JSRuntime.InvokeAsync<string>("eval",
         "document.cookie.split('; ').find(row => row.startsWith('cookieConsent='))?.split('=')[1] || ''");
       
+      Logger.LogInformation("CheckCookieConsent cookie value: '{CookieConsent}'", cookieConsent);
       return cookieConsent == "accepted";
     }
-    catch
+    catch (Exception ex)
     {
+      Logger.LogError(ex, "CheckCookieConsent failed");
       return false;
     }
   }
@@ -134,10 +144,11 @@ else
       var cookieValue = $"c={culture}|uic={culture}";
       await JSRuntime.InvokeVoidAsync("eval",
         $"document.cookie = '.AspNetCore.Culture={cookieValue}; path=/; max-age=31536000; SameSite=Lax{secureFlag}'");
+      Logger.LogInformation("Language cookie set: {CookieValue}, Secure: {IsSecure}", cookieValue, isSecure);
     }
-    catch
+    catch (Exception ex)
     {
-      // Ignore errors
+      Logger.LogError(ex, "SetLanguageCookie failed for culture {Culture}", culture);
     }
   }
 }

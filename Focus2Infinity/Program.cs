@@ -48,6 +48,9 @@ Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Information()
     .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
     .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
+    .MinimumLevel.Override("Microsoft.AspNetCore.Components.Server.Circuits", LogEventLevel.Debug)
+    .MinimumLevel.Override("Microsoft.AspNetCore.SignalR", LogEventLevel.Debug)
+    .MinimumLevel.Override("Microsoft.AspNetCore.Http.Connections", LogEventLevel.Debug)
     .Enrich.FromLogContext()
     .WriteTo.Console()
     .WriteTo.File(
@@ -167,6 +170,8 @@ try
 
     app.UseStaticFiles();
     app.UseAntiforgery();
+
+    app.MapStaticAssets();
 
     app.MapRazorComponents<App>()
        .AddInteractiveServerRenderMode();

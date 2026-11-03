@@ -113,10 +113,10 @@
       submitting = true;
 
       //(bool isValid, string reason) = (false, "Test"); ; //await f2iCommentValidationService.IsValidComment(commentModel.Text);
-      (bool isValid, string reason) = await f2iCommentValidationService.IsValidComment(commentModel.Text);
+      (bool isValid, string reason, string exception) = await f2iCommentValidationService.IsValidComment(commentModel.Text);
 
       var about = isValid ? $"New comment on {Topic}/{Src}" : $"Invalid comment on {Topic}/{Src}";
-      var content = $"Name: {commentModel.Name}\n\nEmail: {commentModel.Email}\n\nMessage: {commentModel.Text}\n\nReason: {reason}";
+      var content = $"Name: {commentModel.Name}\n\nEmail: {commentModel.Email}\n\nMessage: {commentModel.Text}\n\nReason: {reason}\n\nException: {exception}";
       
       var commentItem = new CommentItem
       {

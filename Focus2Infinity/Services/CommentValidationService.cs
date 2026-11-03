@@ -6,7 +6,7 @@ namespace Focus2Infinity.Services
 {
   public interface ICommentValidationService
   {
-    Task<(bool, string)> IsValidComment(string comment);
+    Task<(bool, string, string)> IsValidComment(string comment);
   }
 
   public class CommentValidationService : ICommentValidationService
@@ -77,7 +77,7 @@ Now evaluate the following user comment: ";
       };
     }
 
-    public async Task<(bool, string)> IsValidComment(string comment)
+    public async Task<(bool, string, string)> IsValidComment(string comment)
     {
       _logger.LogInformation("Validating comment with length: {Length}", comment?.Length ?? 0);
       
@@ -85,14 +85,14 @@ Now evaluate the following user comment: ";
       if (string.IsNullOrWhiteSpace(comment))
       {
         _logger.LogWarning("Comment validation failed: empty comment");
-        return (false, "Comment is empty");
+        return (false, "Comment is empty", "");
       }
 
       // Check for length constraints (e.g., max 500 characters)
       if (comment.Length > 500)
       {
         _logger.LogWarning("Comment validation failed: length {Length} exceeds limit", comment.Length);
-        return (false, "Comment too long");
+        return (false, "Comment too long", "");
       }
 
       try
@@ -110,14 +110,15 @@ Now evaluate the following user comment: ";
       catch (Exception ex)
       {
         _logger.LogError(ex, "Error validating comment");
-        return (false, "Validation error occurred");
+        return (false, "Validation error occurred", ex.ToString());
       }
     }
 
-    private (bool, string) ParseModerationResponse(string responseContent)
+    private (bool, string, string) ParseModerationResponse(string responseContent)
     {
       var reason = "undefined";
       bool isAppropriate = false;
+      var exception = string.Empty;
       try
       {
         // Remove markdown code block markers if present
@@ -155,11 +156,12 @@ Now evaluate the following user comment: ";
       catch (System.Text.Json.JsonException ex)
       {
         // If JSON parsing fails, consider the comment invalid
-        reason = $"JSON parsing failed: {ex.Message}";
+        reason = "JSON parsing failed";
+        exception = ex.ToString();
       }
 
       _logger.LogInformation("Comment moderation result: appropriate={IsAppropriate}, reason={Reason}", isAppropriate, reason);
-      return (isAppropriate, reason);
+      return (isAppropriate, reason, exception);
     }
 
     private ChatMessage AssembleChatMessage(string comment)
