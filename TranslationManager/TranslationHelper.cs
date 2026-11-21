@@ -72,6 +72,34 @@ namespace TranslationManager
       _allTerms["en"].Add("Medusa Nebel, Abell 21", "Medusa Nebula, Abell 21");
     } 
 
+    private static Dictionary<string, List<string>> _templateKeys;
+
+    private static List<string> GetTemplateKeys(string language)
+    {
+      _templateKeys ??= new Dictionary<string, List<string>>(StringComparer.Ordinal);
+      if (!_templateKeys.TryGetValue(language, out var keys))
+      {
+        var path = Path.Combine(AppContext.BaseDirectory, "templates", $"template.{language}.json");
+        var template = JsonSerializer.Deserialize<Dictionary<string, string>>(File.ReadAllText(path));
+        keys = template!.Keys.ToList();
+        _templateKeys[language] = keys;
+      }
+      return keys;
+    }
+
+    // the german template defines the key position; the target key is the one at the same position in the target template
+    private static string LookupTemplateKey(string language, string germanKey)
+    {
+      var index = GetTemplateKeys("de").IndexOf(germanKey);
+      var targetKeys = GetTemplateKeys(language);
+      if (index < 0 || index >= targetKeys.Count)
+      {
+        Console.Error.WriteLine($"Key '{germanKey}' not found in templates; keeping it unchanged.");
+        return germanKey;
+      }
+      return targetKeys[index];
+    }
+
     public static void ShowTranslatePage()
     {
       //bool loop = false; //jump back to main menu after an action is done
@@ -175,13 +203,7 @@ namespace TranslationManager
       foreach (var (key, val) in dict!)
       {
         string value = val;
-        string? translatedKey = key;
-        if (key != "Headline")
-        {
-          translatedKey = LookupString(_allTerms[language],  key);
-          if (translatedKey == null)
-            translatedKey = TranslateString(language, key);
-        }
+        string? translatedKey = LookupTemplateKey(language, key);
 
         List<string> tokensForLink = null;
         if (LinkCorrector.ContainsKey(value))

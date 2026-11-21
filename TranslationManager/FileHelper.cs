@@ -226,7 +226,7 @@ namespace TranslationManager
   ""Datum"": """",
   ""Optik"": """",
   ""Kamera"": """",
-  ""Exposure Settings"": """",
+  ""Belichtung"": """",
   ""Kommentar"": """",
   ""Details"": """"
 }";
